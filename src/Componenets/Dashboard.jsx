@@ -2,6 +2,7 @@ import React from 'react'
 import {UserAuth} from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom';
 import { LeagueCreation } from './LeagueCreation';
+import JoinLeague from './JoinLeague.jsx';
 
 const Dashboard = () => {
   const {session, signOut}  = UserAuth();
@@ -28,6 +29,8 @@ const Dashboard = () => {
         <p className="text-gray-500">You can create leagues, join leagues, and view your league standings.</p>
 
         <LeagueCreation userId={session?.user?.id} />
+
+        <JoinLeague userId={session?.user?.id} />
       </div>
       <div>
         <p 
