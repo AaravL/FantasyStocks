@@ -14,7 +14,23 @@ const JoinLeague = ({ userId }) => {
             const { data: leagueId, error: leagueError } = await supabase
                 .from('leagues')
                 .select('league_id')
-                .eq('league_code', leagueCode)
+                .eq('league_code', leagueCode);
+
+            const {count, error: countError} = await supabase
+                .from('league_members')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', userId)
+                .eq('league_id', leagueId[0].league_id);
+            if (count > 0) {
+                throw new Error("You are already a member of this league.");  
+            }
+            const {count : memberCount, error: memberCountError} = await supabase
+                .from('league_members')
+                .select('*', { count: 'exact', head: true })
+                .eq('league_id', leagueId[0].league_id);
+            if (memberCount >= 10) {
+                throw new Error("League is full.");
+            }
             if (leagueError) {
                 throw leagueError; 
             }
@@ -26,6 +42,7 @@ const JoinLeague = ({ userId }) => {
                 .from('league_members')
                 .insert([{ user_id: userId, league_id: leagueId[0].league_id }]);
             console.log("Joined league successfully:", data);
+            console.log(count + " " + memberCount);
             if (error) {
                 throw error;
             }
