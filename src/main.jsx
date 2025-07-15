@@ -8,7 +8,6 @@ import { AuthContextProvider } from './context/AuthContext'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <>
-    <h1>Hello World!</h1>
     <AuthContextProvider>
       <RouterProvider router={router} />
     </AuthContextProvider>

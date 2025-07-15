@@ -3,8 +3,8 @@ import {UserAuth} from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom';
 import { LeagueCreation } from './LeagueCreation';
 import JoinLeague from './JoinLeague.jsx';
-//comment(mango)
-const mango = 67;
+import DisplayLeagues from './DisplayLeagues.jsx';
+
 const Dashboard = () => {
   const {session, signOut}  = UserAuth();
   const navigate = useNavigate();
@@ -32,6 +32,8 @@ const Dashboard = () => {
         <LeagueCreation userId={session?.user?.id} />
 
         <JoinLeague userId={session?.user?.id} />
+
+        <DisplayLeagues userId={session?.user?.id} />
       </div>
       <div>
         <p 

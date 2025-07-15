@@ -42,7 +42,6 @@ const JoinLeague = ({ userId }) => {
                 .from('league_members')
                 .insert([{ user_id: userId, league_id: leagueId[0].league_id }]);
             console.log("Joined league successfully:", data);
-            console.log(count + " " + memberCount);
             if (error) {
                 throw error;
             }
