@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import Signin from './Componenets/Signin'
-import Signup from './Componenets/Signup'
+import Signin from './Components/Signin'
+import Signup from './Components/Signup'
 
 function App() {
   return (

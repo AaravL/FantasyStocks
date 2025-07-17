@@ -1,7 +1,7 @@
 import React from 'react'
-import {UserAuth} from '../context/AuthContext'
+import {UserAuth} from '../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom';
-import { LeagueCreation } from './LeagueCreation';
+import { LeagueCreation } from './LeagueCreation.jsx';
 import JoinLeague from './JoinLeague.jsx';
 import DisplayLeagues from './DisplayLeagues.jsx';
 
