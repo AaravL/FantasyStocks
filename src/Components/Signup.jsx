@@ -20,7 +20,7 @@ const Signup = () => {
     try{
       const result = await signUpNewUser(email, password)
       if(result.success) {
-        navigate('/dashboard')
+        navigate('/create-profile');
       } 
     } catch(error) {
       setError("an error occured");
