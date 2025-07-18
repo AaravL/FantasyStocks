@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import StockLookup from "./Components/StockLookup";
 import Signup from "./Components/Signup";
 import Signin from "./Components/Signin";
 import Dashboard from "./Components/Dashboard";
@@ -27,5 +28,9 @@ export const router = createBrowserRouter([
         path: "/create-profile", 
         element: <PrivateRoute><CreateProfile /></PrivateRoute>,
     },
+    {
+        path: "/test-stock-lookup", 
+        element: <StockLookup />
+    }
 
 ]);

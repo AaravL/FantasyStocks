@@ -25,6 +25,7 @@ dist-ssr
 
 # Backend virtual environment
 backend/StockFantasy
+backend/__pycache__
 
 # Secrets! 
 .env
