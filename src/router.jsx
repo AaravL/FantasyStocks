@@ -1,9 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
-import Signup from "./Componenets/Signup";
-import Signin from "./Componenets/Signin";
-import Dashboard from "./Componenets/Dashboard";
-import PrivateRoute from "./Componenets/PrivateRoute";
-import CreateProfile from "./Componenets/CreateProfile"; 
+import StockLookup from "./Components/StockLookup";
+import Signup from "./Components/Signup";
+import Signin from "./Components/Signin";
+import Dashboard from "./Components/Dashboard";
+import PrivateRoute from "./Components/PrivateRoute";
+import CreateProfile from "./Components/CreateProfile"; 
 import App from "./App";
 
 export const router = createBrowserRouter([
@@ -27,5 +28,9 @@ export const router = createBrowserRouter([
         path: "/create-profile", 
         element: <PrivateRoute><CreateProfile /></PrivateRoute>,
     },
+    {
+        path: "/test-stock-lookup", 
+        element: <StockLookup />
+    }
 
 ]);
