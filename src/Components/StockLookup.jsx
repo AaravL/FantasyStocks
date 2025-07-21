@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-
 const StockLookup = () => {
 
   const [symbol, setSymbol] = useState('');
