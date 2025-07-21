@@ -8,6 +8,8 @@ const LeaguePage = () => {
 
   const [leagueName, setLeagueName] = useState("");
   const [leagueCode, setLeagueCode] = useState("");
+  const [members, setMembers] = useState([]);
+  const [error, setError] = useState("");
 
   const handleBackToDashboard = () => {
     navigate("/dashboard");
@@ -35,29 +37,46 @@ const LeaguePage = () => {
       }
     };
 
+    const fetchLeagueMembers = async () => {
+      const { data, error } = await supabase
+        .from('league_members')
+        .select('user_id, display_name')
+        .eq('league_id', leagueId);
+
+      if (error) {
+        console.error("Error fetching league members:", error);
+        setError("Could not fetch members.");
+      } else {
+        setMembers(data);
+      }
+    };
+
     fetchLeagueData();
+    fetchLeagueMembers();
   }, [leagueId]);
-
-  const fetchLeagueMembers = async () => {
-    const { data, error } = await supabase
-      .from('league_members')
-      .select('user_id')
-      .eq('league_id', leagueId);
-
-    if (error) {
-      console.error("Error fetching league members:", error);
-    }
-    return data;
-  };
-
 
   return (
     <div className="pt-24 text-center">
       <h1 className="text-3xl font-bold mb-6">Welcome to: {leagueName}</h1>
       <p className="text-lg mb-4">League Code: {leagueCode}</p>
+
+      <h2 className="text-2xl font-semibold mt-10">League Members:</h2>
+      {error && <p className="text-red-500">{error}</p>}
+      <ul className="mt-4 space-y-2">
+        {members.length === 0 ? (
+          <p>No members in this league.</p>
+        ) : (
+          members.map((member, index) => (
+            <li key={index} className="text-gray-700">
+              {member.display_name || member.user_id}
+            </li>
+          ))
+        )}
+      </ul>
+
       <button
         onClick={handleBackToDashboard}
-        className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600"
+        className="mt-8 bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600"
       >
         Go to Dashboard
       </button>
