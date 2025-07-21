@@ -1,8 +1,12 @@
 #TODO: WHAT ABOUT HOLIDAYS!!!!! Probably retrieve from alpaca and store for every other case. 
 
+from dotenv import load_dotenv
+import os
+
 from datetime import datetime, timedelta, timezone as tz
 
-TIME_CHUNK_SIZE = 5
+load_dotenv()
+TIME_CHUNK_SIZE = int(os.getenv("TIME_CHUNK_SIZE"))
 
 """
 Converts date to previous Friday if Sat/Sun. Expects UTC
@@ -39,6 +43,20 @@ Rounds time to nearest time point that rests on boundary of a time chunk specifi
 def round_to_time_point(time: datetime) -> datetime: 
     chunk_minute = time.minute - (time.minute % TIME_CHUNK_SIZE)
     return time.replace(minute = chunk_minute)
+
+"""
+Gets the most recent Monday opening time
+"""
+def get_monday(time: datetime) -> datetime: 
+    time = time.astimezone(tz.utc).replace(second = 0, microsecond = 0)
+    time = clip_to_trading_hours(time)    
+    return (time - timedelta(days = time.weekday())).replace(hour=14, minute=30)
+
+"""
+Gets the most recent Monday opening time. ASSUMES time has been processed to a valid trading day. 
+"""
+def get_monday_from_processed(time: datetime) -> datetime: 
+    return (time - timedelta(days = time.weekday())).replace(hour=14, minute=30) 
 
 """
 This function takes in the current time and processes it to get a valid trading time point to query
