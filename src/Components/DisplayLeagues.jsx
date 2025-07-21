@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { supabase } from '../supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const DisplayLeagues = ({ userId }) => {
     const [count, setCount] = useState(null);
     const [error, setError] = useState(null);
     const [leagues, setLeagues] = useState([]);
     const [index, setIndex] = useState(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCount = async () => {
@@ -33,6 +35,12 @@ const DisplayLeagues = ({ userId }) => {
         }
     }
 
+    const goToLeague = () => {
+        if (leagues.length > 0) {
+            navigate(`/league/${leagues[index]?.league_id}`);
+        }
+    }
+
     return (
         <div>
             {error && <div>Error: {error.message}</div>}
@@ -42,7 +50,7 @@ const DisplayLeagues = ({ userId }) => {
             )}
             {count > 0 && (
                 <div>
-                    <p>League Name : {leagues[index]?.leagues?.name || "cannot retrieve"}</p>
+                    <button onClick = {goToLeague}>League Name : {leagues[index]?.leagues?.name || "cannot retrieve"}</button>
                     <button onClick={nextInd}>Next League</button>
                 </div>
             )}

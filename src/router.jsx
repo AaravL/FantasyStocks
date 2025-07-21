@@ -31,6 +31,10 @@ export const router = createBrowserRouter([
     {
         path: "/test-stock-lookup", 
         element: <StockLookup />
+    },
+    {
+        path: "/league/:leagueId",
+        element: <PrivateRoute><div>League Page Placeholder</div></PrivateRoute>
     }
 
 ]);
