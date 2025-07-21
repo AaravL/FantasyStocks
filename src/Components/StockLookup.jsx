@@ -5,14 +5,30 @@ const StockLookup = () => {
 
   const [symbol, setSymbol] = useState('');
   const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => { 
+
+    setError(null);
+    setResult(null);
+
     e.preventDefault();
-    const res = await fetch(`http://localhost:8000/price?ticker=${symbol}`);
-    const data = await res.json();
-    console.log(data);
-    setResult(data);
-  }
+
+    try { 
+        const res = await fetch(`http://localhost:8000/price?ticker=${symbol}`);
+        const data = await res.json();
+
+        if (!res.ok) { 
+            setError(data.detail || "Stock data not found.");
+        } else { 
+            setResult(data);
+        }
+
+        console.log(data);
+    } catch (err) { 
+        setError("Failed to fetch stock price");
+    }
+}
 
 
   return (
@@ -26,6 +42,7 @@ const StockLookup = () => {
         <button type="submit">Submit</button>
       </form>
 
+      {error && <p className="text-red-600">{error}</p>}
       {result?.price_data && (
         <div>
           <p>Price: {result.price_data.vwap}</p>
