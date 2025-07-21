@@ -6,6 +6,7 @@ import Dashboard from "./Components/Dashboard";
 import PrivateRoute from "./Components/PrivateRoute";
 import CreateProfile from "./Components/CreateProfile"; 
 import App from "./App";
+import LeaguePage from "./Components/LeaguePage";
 
 export const router = createBrowserRouter([
     {
@@ -34,7 +35,7 @@ export const router = createBrowserRouter([
     },
     {
         path: "/league/:leagueId",
-        element: <PrivateRoute><div>League Page Placeholder</div></PrivateRoute>
+        element: <PrivateRoute><LeaguePage /></PrivateRoute>
     }
 
 ]);
