@@ -23,6 +23,7 @@ def root():
 @app.get("/price")
 def get_stock_price(ticker: str, ts: Optional[str] = None):
     try:
+        ticker = ticker.upper()
         if ts:
             dt = datetime.fromisoformat(ts)
         else:
