@@ -32,7 +32,7 @@ const Signup = () => {
   return (
     <div>
       <form onSubmit={handleSignup} className = "max-w-md m-auto pt-24"> 
-        <h2 className = "font-bold pb-2">Signup Today!</h2>
+        <h2 className = "font-bold text-red-600 pb-2">Signup Today!</h2>
         <p>Already have an account? <Link to= "/signin">Sign in!</Link></p>
         <div>
           <input onChange= {(e) => setEmail(e.target.value)}
