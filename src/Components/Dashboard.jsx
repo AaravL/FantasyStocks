@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { LeagueCreation } from './LeagueCreation';
 import JoinLeague from './JoinLeague.jsx';
+import DisplayLeagues from './DisplayLeagues.jsx';
 
 const Dashboard = () => {
   const { session, signOut } = UserAuth();
@@ -66,6 +67,8 @@ const Dashboard = () => {
 
       <LeagueCreation userId={session?.user?.id} />
       <JoinLeague userId={session?.user?.id} />
+
+      <DisplayLeagues  userId={session?.user?.id} />
 
       <div>
         <p

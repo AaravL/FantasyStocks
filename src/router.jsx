@@ -6,6 +6,7 @@ import Dashboard from "./Components/Dashboard";
 import PrivateRoute from "./Components/PrivateRoute";
 import CreateProfile from "./Components/CreateProfile"; 
 import App from "./App";
+import LeaguePage from "./Components/LeaguePage";
 
 export const router = createBrowserRouter([
     {
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
     {
         path: "/test-stock-lookup", 
         element: <StockLookup />
+    },
+    {
+        path: "/league/:leagueId",
+        element: <PrivateRoute><LeaguePage /></PrivateRoute>
     }
 
 ]);
