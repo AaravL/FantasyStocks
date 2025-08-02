@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import BuySellStock from "./Stocks/BuySellStock";
+import { generateMatchups } from "./matchups"; // Adjust path as needed
 
 const LeaguePage = () => {
   const { leagueId } = useParams();
@@ -15,6 +16,8 @@ const LeaguePage = () => {
   const [error, setError] = useState("");
   const [newLeagueDisplayName, setNewLeagueDisplayName] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
+  const [matchupStatus, setMatchupStatus] = useState("");
+  const [matchupLoading, setMatchupLoading] = useState(false);
 
    const [leagueMemberId, setLeagueMemberId] = useState(null);
 
@@ -107,7 +110,6 @@ const LeaguePage = () => {
       setUpdateMessage("Display name updated!");
       setNewLeagueDisplayName("");
 
-      // Refresh member list after update
       const { data, error: fetchError } = await supabase
         .from("league_members")
         .select("user_id, display_name")
@@ -115,6 +117,10 @@ const LeaguePage = () => {
 
       if (!fetchError) setMembers(data);
     }
+  };
+
+  const handleGenerateMatchups = () => {
+    generateMatchups(leagueId, setMatchupStatus, setMatchupLoading);
   };
 
   return (
@@ -155,8 +161,23 @@ const LeaguePage = () => {
         >
           Update Display Name
         </button>
-        {updateMessage && <p className="text-sm text-blue-600">{updateMessage}</p>}
+        {updateMessage && (
+          <p className="text-sm text-blue-600">{updateMessage}</p>
+        )}
       </form>
+
+      <div className="mt-6">
+        <button
+          onClick={handleGenerateMatchups}
+          disabled={matchupLoading}
+          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+        >
+          {matchupLoading ? "Generating Matchups..." : "Generate Matchups"}
+        </button>
+        {matchupStatus && (
+          <p className="mt-2 text-sm text-gray-700">{matchupStatus}</p>
+        )}
+      </div>
 
       {/* Want a form to [buy/sell] [stock ticker + stock amount OR stock price] */}
       <BuySellStock leagueMemberId={leagueMemberId} />
