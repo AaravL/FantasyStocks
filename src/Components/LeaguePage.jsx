@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
+import BuySellStock from "./Stocks/BuySellStock";
 
 const LeaguePage = () => {
   const { leagueId } = useParams();
@@ -14,6 +15,8 @@ const LeaguePage = () => {
   const [error, setError] = useState("");
   const [newLeagueDisplayName, setNewLeagueDisplayName] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
+
+   const [leagueMemberId, setLeagueMemberId] = useState(null);
 
   const userId = session?.user?.id;
 
@@ -56,6 +59,36 @@ const LeaguePage = () => {
     fetchLeagueData();
     fetchLeagueMembers();
   }, [leagueId]);
+
+  useEffect(() => {
+
+    const fetchLeagueMemberId = async () => { 
+      if (!userId || !leagueId) return;
+
+      const {data, error} = await supabase 
+        .from("league_members")
+        .select("league_member_id")
+        .eq("user_id", userId)
+        .eq("league_id", leagueId)
+        .single();
+      
+      if (error) { 
+        console.error("Error fetching league member id:", error);
+        setError("Could not fetch league member id.");
+        return null;
+      } 
+
+      if (!data) { 
+        console.error("Error finding league member id:", error);
+        setError("Could not finding league member id.");
+        return null; 
+      }
+
+      setLeagueMemberId(data.league_member_id);  // You'd define this with useState
+    };
+
+    fetchLeagueMemberId();
+  }, [userId, leagueId]);
 
   const handleDisplayNameChange = async (e) => {
     e.preventDefault();
@@ -124,6 +157,9 @@ const LeaguePage = () => {
         </button>
         {updateMessage && <p className="text-sm text-blue-600">{updateMessage}</p>}
       </form>
+
+      {/* Want a form to [buy/sell] [stock ticker + stock amount OR stock price] */}
+      <BuySellStock leagueMemberId={leagueMemberId} />
 
       <button
         onClick={handleBackToDashboard}
