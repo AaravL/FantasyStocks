@@ -27,7 +27,7 @@ function ButtonGroup({optionOneString, optionTwoString, handleFunc, toggleVariab
 const BuySellStock = ({leagueMemberId}) => { 
 
     const [symbol, setSymbol] = useState("");
-    const [stockAmt, setStockAmt] = useState(0);
+    const [stockAmt, setStockAmt] = useState(null);
     const [isShares, setIsShares] = useState(true);
     const [isBuy, setIsBuy] = useState(true);
     const [error, setError] = useState('');
@@ -305,7 +305,12 @@ const BuySellStock = ({leagueMemberId}) => {
                     <input
                         id="amount" type="number" placeholder={`${isShares ? "Share amount" : "Dollar Amount"}`} 
                         className="mt-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value = {stockAmt} onChange={(e) => setStockAmt(Number(e.target.value))}
+                        value = {stockAmt} onChange={(e) => {
+                            let value = Number(e.target.value);
+                            if (value === 0) value = null;
+                            setStockAmt(value)
+                        
+                        }}
                     />
                 </div>
 
