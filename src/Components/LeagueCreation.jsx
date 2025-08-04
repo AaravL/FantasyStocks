@@ -36,7 +36,7 @@ const LeagueCreation = ({ userId }) => {
     
     return (
         <div>
-        <form onSubmit={createLeague} className="max-w-md m-auto pt-24">
+        <form onSubmit={createLeague} className="m-auto">
             <h2 className="font-bold pb-2">Create League</h2>
             <input
             type="text"

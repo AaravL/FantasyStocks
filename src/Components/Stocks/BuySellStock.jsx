@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import { UserAuth } from "../../context/AuthContext";
+import Card from "../Card.jsx";
 
 function Button({optionString, handleFunc, toggleValue}) { 
     return (
@@ -44,6 +44,11 @@ const BuySellStock = ({leagueMemberId}) => {
         setResult(null);
         setLoading(true);
 
+        if (!symbol) { 
+            setStockError("Enter a stock ticker to fetch price!");
+            return {error: "Enter a stock ticker to fetch price!"};
+        }
+
         try { 
             const res = await fetch(`http://localhost:8000/price?ticker=${symbol}`);
             const data = await res.json();
@@ -79,6 +84,12 @@ const BuySellStock = ({leagueMemberId}) => {
         setError(null);
 
         e.preventDefault();
+
+        if (!stockAmt) {
+            setError("Must enter a non-zero stock amount!");
+            return ;  
+        }
+
         const { result, error } = await fetchStockInfo(e);
 
         if (error) { 
@@ -88,7 +99,6 @@ const BuySellStock = ({leagueMemberId}) => {
 
         alert("Stock good to go!");
         const vwap = result.price_data.vwap;
-        alert("BREAKPING");
 
         const key = {
             leagueMemberId,
@@ -265,69 +275,63 @@ const BuySellStock = ({leagueMemberId}) => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto mt-2 text-white-800 space-y-6 bg-black shadow rounded-lg p-4">
-            {/* Want a form to [buy/sell] [stock ticker + stock amount OR stock price] */}
+        <form onSubmit={handleSubmit}> 
+            {/* Top row (ticker symbol + optional information) */}
+            <div className="flex items-center space-x-4">
+                <input id="ticker" type="text" placeholder="ticker" className="border p-2 rounded outline outline-white focus:outline-blue-700"
+                    value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            fetchStockInfo(e);  
+                        }
+                    }}
+                />
+
+                {loading && <p className="text-yellow-400 ml-4">Loading...</p>}
+
+                {stockError && !loading && (
+                    <p className="text-red-600 mt-4 text-center">{stockError}</p>
+                )}
+
+                {result?.price_data && !loading && (
+                    <>
+                        <p><strong>Price:</strong> ${result.price_data.vwap}</p>
+                        <p><strong>Timestamp:</strong> {new Date(result.price_data.timestamp).toLocaleString()}</p>
+                    </>
+                )}
+            </div>
+
+            {/* Middle row (buy/sell shares/amt text entry) */}
+            <div className="mt-2 flex items-center space-x-4 p-2">
+                <div className="grid grid-cols-2 gap-4">
+                <ButtonGroup optionOneString={"buy"} optionTwoString={"sell"} handleFunc={handleBuySell} toggleVariable={isBuy} />
+                <ButtonGroup optionOneString={"shares"} optionTwoString={"dollars"} handleFunc={handleSharesDollars} toggleVariable={isShares}/>
+                </div>
+
+                <input
+                    id="amount" type="number" placeholder={`${isShares ? "Share amount" : "Dollar Amount"}`} 
+                    className="mt-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value = {stockAmt} onChange={(e) => {
+                        let value = Number(e.target.value);
+                        if (value === 0) value = null;
+                        setStockAmt(value)
+                    
+                    }}
+                />
+            </div>
+
+            <div>
+                <button type="submit" className="bg-blue-600 text-white rounded-md py-2 font-medium hover:bg-blue-700 transition">
+                Submit
+                </button>
+            </div>
             
-            <h2 className="text-2xl font-semibold"> Buy/ Sell Stocks!</h2>
-            <form onSubmit={handleSubmit}> 
-                {/* Top row (ticker symbol + optional information) */}
-                <div className="flex items-center space-x-4">
-                    <input id="ticker" type="text" placeholder="ticker" className="border p-2 rounded outline outline-white focus:outline-blue-700"
-                        value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                fetchStockInfo(e);  
-                            }
-                        }}
-                    />
-
-                    {loading && <p className="text-yellow-400 ml-4">Loading...</p>}
-
-                    {stockError && !loading && (
-                        <p className="text-red-600 mt-4 text-center">{stockError}</p>
-                    )}
-
-                    {result?.price_data && !loading && (
-                        <>
-                            <p><strong>Price:</strong> ${result.price_data.vwap}</p>
-                            <p><strong>Timestamp:</strong> {new Date(result.price_data.timestamp).toLocaleString()}</p>
-                        </>
-                    )}
-                </div>
-
-                {/* Middle row (buy/sell shares/amt text entry) */}
-                <div className="mt-2 flex items-center space-x-4 p-2">
-                    <div className="grid grid-cols-2 gap-4">
-                    <ButtonGroup optionOneString={"buy"} optionTwoString={"sell"} handleFunc={handleBuySell} toggleVariable={isBuy} />
-                    <ButtonGroup optionOneString={"shares"} optionTwoString={"dollars"} handleFunc={handleSharesDollars} toggleVariable={isShares}/>
-                    </div>
-
-                    <input
-                        id="amount" type="number" placeholder={`${isShares ? "Share amount" : "Dollar Amount"}`} 
-                        className="mt-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value = {stockAmt} onChange={(e) => {
-                            let value = Number(e.target.value);
-                            if (value === 0) value = null;
-                            setStockAmt(value)
-                        
-                        }}
-                    />
-                </div>
-
-                <div>
-                    <button type="submit" className="bg-blue-600 text-white rounded-md py-2 font-medium hover:bg-blue-700 transition">
-                    Submit
-                    </button>
-                </div>
-                
-                <div>
-                    {error && (
-                        <p className="text-red-600 mt-4 text-center">{error}</p>
-                    )}
-                </div>
-            </form>
-            
-        </div>
+            <div>
+                {error && (
+                    <p className="text-red-600 mt-4 text-center">{error}</p>
+                )}
+            </div>
+        </form>
     );
 }
 

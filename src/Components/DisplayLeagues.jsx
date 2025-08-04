@@ -43,7 +43,6 @@ const DisplayLeagues = ({ userId }) => {
 
     return (
         <div>
-            {error && <div>Error: {error.message}</div>}
             <div>League count: {count !== null ? count : 'Loading...'}</div>
             {count === 0 && (
                 <p>You are not part of any leagues. Join or create a league to get started!</p>
@@ -54,6 +53,9 @@ const DisplayLeagues = ({ userId }) => {
                     <button onClick={nextInd}>Next League</button>
                 </div>
             )}
+
+            {error && <div>Error: {error.message}</div>}
+
         </div>
     );
 };

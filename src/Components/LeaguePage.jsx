@@ -3,7 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import BuySellStock from "./Stocks/BuySellStock";
+import Portfolio from "./Stocks/Portfolio";
 import { generateMatchups } from "./matchups"; // Adjust path as needed
+import Card from "./Card.jsx";
+
+const tabs = ["Matchup", "Buy/Sell Stock", "Portfolio"];
 
 const LeaguePage = () => {
   const { leagueId } = useParams();
@@ -19,7 +23,8 @@ const LeaguePage = () => {
   const [matchupStatus, setMatchupStatus] = useState("");
   const [matchupLoading, setMatchupLoading] = useState(false);
 
-   const [leagueMemberId, setLeagueMemberId] = useState(null);
+  const [leagueMemberId, setLeagueMemberId] = useState(null);
+  const [activeTab, setActiveTab] = useState(tabs[1]);
 
   const userId = session?.user?.id;
 
@@ -179,8 +184,22 @@ const LeaguePage = () => {
         )}
       </div>
 
-      {/* Want a form to [buy/sell] [stock ticker + stock amount OR stock price] */}
-      <BuySellStock leagueMemberId={leagueMemberId} />
+      <Card title = "Management">
+        <div className="flex border-b border-gray-700">
+          {tabs.map((tab) => (
+            <button 
+              key={tab} onClick={() => setActiveTab(tab)}
+              className= {`flex-1 px-4 py-2 text-sm font-medium ${activeTab == tab ? "bg-gray-800 text-white border" : "bg-gray-900 text-gray-400 hover:text-white"}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>  
+        
+
+        {activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
+        {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
+      </Card>
 
       <button
         onClick={handleBackToDashboard}

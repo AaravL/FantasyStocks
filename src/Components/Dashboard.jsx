@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient';
 import { LeagueCreation } from './LeagueCreation';
 import JoinLeague from './JoinLeague.jsx';
 import DisplayLeagues from './DisplayLeagues.jsx';
+import Card from "./Card.jsx";
 
 const Dashboard = () => {
   const { session, signOut } = UserAuth();
@@ -65,10 +66,14 @@ const Dashboard = () => {
         You can create leagues, join leagues, and view your league standings.
       </p>
 
-      <LeagueCreation userId={session?.user?.id} />
-      <JoinLeague userId={session?.user?.id} />
+      <Card title = "Current League">
+        <DisplayLeagues  userId={session?.user?.id} />
+      </Card>
 
-      <DisplayLeagues  userId={session?.user?.id} />
+      <Card title = "League Creation">
+        <LeagueCreation userId={session?.user?.id} />
+        <JoinLeague userId={session?.user?.id} />
+      </Card>
 
       <div>
         <p
