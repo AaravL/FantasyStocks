@@ -61,10 +61,10 @@ def fetch_price(ticker: str, ts: datetime) -> dict:
 
     # Query Alpaca for data
     query_end = use_time
-    query_start = get_monday_from_processed(query_end)
-    if current_data is not None and (STAMP := current_data['timestamp'].max().to_pydatetime()):
-        query_start = max(STAMP, query_start)
-    
+    query_start = get_monday_from_processed(query_end) # Ensure there is enough room to ensure data exists
+    if query_start.weekday() == 0: 
+        query_start = query_start - timedelta(days=7)
+
     alpaca_client = StockHistoricalDataClient(API_KEY, API_SECRET)
     request_params = StockBarsRequest(
         symbol_or_symbols=[ticker],
@@ -79,6 +79,8 @@ def fetch_price(ticker: str, ts: datetime) -> dict:
         raise ValueError(f"No price data found for ticker '{ticker}'.")
     
     # Insert into database and return data
+    if bars.df.iloc[0].isnull().any():
+        raise ValueError(f"Ticker {ticker} is not traded frequently enough.")
     data = fill_forward_prices(bars.df, query_start, query_end)
     add_entries(db_client, data)
 
