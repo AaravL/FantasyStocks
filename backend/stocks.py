@@ -1,7 +1,7 @@
 from time_utils import process_time, get_monday_from_processed
 from database import get_client, retrieve_stock, add_entries
 from datetime import datetime, timedelta
-
+from config import TIME_CHUNK_SIZE
 from dotenv import load_dotenv
 import os
 
@@ -13,9 +13,10 @@ import pandas as pd
 
 load_dotenv()
 
+
 API_KEY = os.getenv("ALPACA_API_KEY")
 API_SECRET = os.getenv("ALPACA_API_SECRET")
-TIME_CHUNK_SIZE = int(os.getenv("TIME_CHUNK_SIZE"))
+TIME_CHUNK_SIZE = TIME_CHUNK_SIZE
 
 
 """

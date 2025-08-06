@@ -1,12 +1,13 @@
 #TODO: WHAT ABOUT HOLIDAYS!!!!! Probably retrieve from alpaca and store for every other case. 
 
 from dotenv import load_dotenv
+from config import TIME_CHUNK_SIZE
 import os
 
 from datetime import datetime, timedelta, timezone as tz
 
 load_dotenv()
-TIME_CHUNK_SIZE = int(os.getenv("TIME_CHUNK_SIZE"))
+TIME_CHUNK_SIZE = TIME_CHUNK_SIZE
 
 """
 Converts date to previous Friday if Sat/Sun. Expects UTC

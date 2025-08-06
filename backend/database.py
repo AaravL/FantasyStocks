@@ -1,12 +1,16 @@
 from supabase import create_client, Client
 import pandas as pd
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 """
 Get a supabase client
 """
 def get_client() -> Client: 
-    url = "https://yjuvzwdqgrnxnibfmqnx.supabase.co"
-    key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqdXZ6d2RxZ3JueG5pYmZtcW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NzM1MDYsImV4cCI6MjA2NjA0OTUwNn0.2GHY9B4lUTol8LYqEU2SxOAbY6utTlHUtirq_ojmAOo"
+    url = os.getenv("VITE_SUPABASE_URL")
+    key = os.getenv("VITE_SUPABASE_ANON_KEY")
     client = create_client(url, key)
     
     return client

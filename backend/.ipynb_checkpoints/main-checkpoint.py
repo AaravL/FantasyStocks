@@ -2,10 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone as tz
 from typing import Optional
+
 from datetime import datetime
 from stocks import fetch_price
-from MatchupCalc import run_weekly_matchups
-import traceback
 
 app = FastAPI()
 
@@ -36,11 +35,3 @@ def get_stock_price(ticker: str, ts: Optional[str] = None):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post("/run-matchups")
-def run_matchups():
-    try:
-        run_weekly_matchups()
-        return {"message": "Matchup calculations completed successfully."}
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))

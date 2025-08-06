@@ -128,6 +128,24 @@ const LeaguePage = () => {
     generateMatchups(leagueId, setMatchupStatus, setMatchupLoading);
   };
 
+  //temp to test calculating weekly matchups
+  const calculateMatchups = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/run-matchups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log(data.message); // "Matchups calculated successfully"
+    } catch (error) {
+      console.error("Error calculating matchups:", error);
+    }
+  };
+
+
   return (
     <div className="pt-24 text-center">
       <h1 className="text-3xl font-bold mb-6">Welcome to: {leagueName}</h1>
@@ -173,7 +191,10 @@ const LeaguePage = () => {
 
       <div className="mt-6">
         <button
-          onClick={handleGenerateMatchups}
+          onClick={() => {
+  handleGenerateMatchups();
+  calculateMatchups();
+}}
           disabled={matchupLoading}
           className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
         >
