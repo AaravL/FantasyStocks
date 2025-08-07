@@ -4,6 +4,7 @@ import traceback
 from datetime import datetime, date
 from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
 # Load environment variables early
 load_dotenv()
@@ -29,9 +30,18 @@ def get_current_week(client):
 def fetch_unprocessed_matchups(client, end_time):
     today_str = date.today().isoformat()
     week = get_current_week(client)
-    response = client.table("matchups").select("*").lte("week", week).neq("created_date", today_str).execute()
+    all_matchups = []
+    response = client.table("matchups").select("*").order("week", desc=False).is_("winner_id", None).execute()
     print(f"Fetched {len(response.data)} unprocessed matchups for week {week} ending on {today_str}.")
-    return response.data
+
+    for matchup in response.data:
+        start_date = datetime.fromisoformat(matchup["created_date"]).date()
+        week = matchup["week"]
+        matchup_release_date = start_date + timedelta(days=7 * (week))
+        if matchup_release_date <= date.today():
+            all_matchups.append(matchup)
+    
+    return all_matchups
 
 def weekly_score_calc(client, matchups):
     for matchup in matchups:
@@ -47,12 +57,14 @@ def weekly_score_calc(client, matchups):
         user1_stocks = client.table("holdings").select("ticker", "stock_amount").eq("league_member_id", matchup['user1_id']).execute().data
         user2_stocks = client.table("holdings").select("ticker", "stock_amount").eq("league_member_id", matchup['user2_id']).execute().data
 
+        week_number = get_current_week(client)
+
         for stock in user1_stocks:
-            price = (fetch_price(stock['ticker'], datetime.now()))["vwap"]
+            price = (fetch_price(stock['ticker'], datetime.fromisoformat(matchup["created_date"]) + timedelta(days=7 * week_number)))["vwap"]
             user1_score += price * stock['stock_amount']
 
         for stock in user2_stocks:
-            price = (fetch_price(stock['ticker'], datetime.now()))["vwap"]
+            price = (fetch_price(stock['ticker'], datetime.fromisoformat(matchup["created_date"])  + timedelta(days=7 * week_number)))["vwap"]
             user2_score += price * stock['stock_amount']
 
         user1_score /= user1_start_amount
@@ -66,6 +78,19 @@ def weekly_score_calc(client, matchups):
             "u2_score": user2_score
         }).eq("id", matchup['id']).execute()
         print("Update response:", response)
+
+        user1_score *= user1_start_amount
+        user2_score *= user2_start_amount
+
+        client.table("portfolios").update({
+            "start_of_week_total": user1_score
+        }).eq("league_member_id", matchup['user1_id']).execute()
+
+        client.table("portfolios").update({
+            "start_of_week_total": user2_score
+        }).eq("league_member_id", matchup['user2_id']).execute()
+
+
     print("All matchups processed successfully.")
     return True
 
