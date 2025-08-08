@@ -38,6 +38,7 @@ export const generateMatchups = async (leagueId, setStatus, setLoading) => {
         if (user1 === null || user2 === null) continue;
 
         generatedMatchups.push({
+          league_id: leagueId, // ✅ Include this line
           week: round + 1,
           user1_id: user1,
           user2_id: user2,

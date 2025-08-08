@@ -221,7 +221,12 @@ const LeaguePage = () => {
         {activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
       </Card>
-
+      <button
+  onClick={() => navigate(`/league/${leagueId}/leaderboard`)}
+  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4"
+>
+  View Leaderboard
+</button>
       <button
         onClick={handleBackToDashboard}
         className="mt-8 bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600"
