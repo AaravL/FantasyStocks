@@ -92,7 +92,7 @@ const LeaguePage = () => {
         return null; 
       }
 
-      setLeagueMemberId(data.league_member_id);  // You'd define this with useState
+      setLeagueMemberId(data.league_member_id); 
     };
 
     fetchLeagueMemberId();
@@ -227,6 +227,14 @@ const LeaguePage = () => {
 >
   View Leaderboard
 </button>
+
+<button
+  onClick={() => navigate(`/league/${leagueId}/AddDropStock`)}
+  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4"
+>
+  Add/Drop Stocks
+</button>
+
       <button
         onClick={handleBackToDashboard}
         className="mt-8 bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600"

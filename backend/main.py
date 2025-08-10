@@ -5,6 +5,7 @@ from typing import Optional
 from datetime import datetime
 from stocks import fetch_price
 from MatchupCalc import run_weekly_matchups
+from stockManagement import Stock, add_stock, remove_stock
 import traceback
 
 app = FastAPI()
@@ -41,6 +42,22 @@ def run_matchups():
     try:
         run_weekly_matchups()
         return {"message": "Matchup calculations completed successfully."}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/add-stock")
+def add_stock_endpoint(stock: Stock):
+    try:
+        return add_stock(stock)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/remove-stock")
+def remove_stock_endpoint(stock: Stock):
+    try:
+        return remove_stock(stock)
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

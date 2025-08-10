@@ -8,6 +8,7 @@ import CreateProfile from "./Components/CreateProfile";
 import App from "./App";
 import LeaguePage from "./Components/LeaguePage";
 import LeaderboardPage from "./Components/LeaderboardPage"; 
+import AddDropStock from "./Components/AddDropStock";
 
 export const router = createBrowserRouter([
     {
@@ -44,6 +45,11 @@ export const router = createBrowserRouter([
         element: 
           <PrivateRoute>  <LeaderboardPage /> </PrivateRoute>
         
-      },
+    },
+
+    {
+        path: "/league/:leagueId/AddDropStock",
+        element: <PrivateRoute><AddDropStock /></PrivateRoute>
+    }
 
 ]);
