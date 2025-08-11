@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backend": "cd backend && python3.13 -m uvicorn main:app --reload",
+    "backend": "cd backend && python3 -m uvicorn main:app --reload",
     "dev:all": "concurrently \"npm run dev\" \"npm run backend\""
   },
   "dependencies": {
