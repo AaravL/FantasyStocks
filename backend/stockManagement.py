@@ -24,6 +24,7 @@ class Stock(BaseModel):
 
 def add_stock(data: Stock):
     client = get_client()
+    print("Adding Stock!")
     existing_stock = client.table("user_stocks").select("*").eq("league_id", data.league_id).eq("Ticker", data.ticker).execute().data
     
     if(existing_stock):
@@ -36,7 +37,6 @@ def add_stock(data: Stock):
 
     return {"message": "Stock added successfully.", "data": response.data}
 
-@app.post("/remove-stock")
 def remove_stock(data: Stock):
     client = get_client()
     existing_stock = client.table("user_stocks").select("*").eq("league_member_id", data.league_member_id).eq("Ticker", data.ticker).execute().data

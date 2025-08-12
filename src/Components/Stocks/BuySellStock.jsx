@@ -23,7 +23,6 @@ function ButtonGroup({optionOneString, optionTwoString, handleFunc, toggleVariab
     );
 }
 
-
 const BuySellStock = ({leagueMemberId}) => { 
 
     const [symbol, setSymbol] = useState("");

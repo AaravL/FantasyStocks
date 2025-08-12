@@ -27,10 +27,10 @@ const LeagueCreation = ({ userId }) => {
         }
         console.log("League created successfully:", data);
         } catch (error) {
-        setError("An error occurred while creating the league.");
-        console.error("Error creating league:", error);
+            setError("An error occurred while creating the league.");
+            console.error("Error creating league:", error);
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
     

@@ -4,10 +4,12 @@ import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import BuySellStock from "./Stocks/BuySellStock";
 import Portfolio from "./Stocks/Portfolio";
+import AddDropStock from "./AddDropStock";
+import LeaderboardPage from "./LeaderboardPage";
 import { generateMatchups } from "./matchups"; // Adjust path as needed
 import Card from "./Card.jsx";
 
-const tabs = ["Matchup", "Buy/Sell Stock", "Portfolio"];
+const tabs = ["Matchup", "Buy/Sell Stock", "Portfolio", "View Leaderboard", "Add/Drop Stock"];
 
 const LeaguePage = () => {
   const { leagueId } = useParams();
@@ -220,20 +222,10 @@ const LeaguePage = () => {
 
         {activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
-      </Card>
-      <button
-  onClick={() => navigate(`/league/${leagueId}/leaderboard`)}
-  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4"
->
-  View Leaderboard
-</button>
+        {activeTab == tabs[3] && <LeaderboardPage leagueId={leagueId} />}
+        {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} leagueMemberId={leagueMemberId} />}
 
-<button
-  onClick={() => navigate(`/league/${leagueId}/AddDropStock`)}
-  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4"
->
-  Add/Drop Stocks
-</button>
+      </Card>
 
       <button
         onClick={handleBackToDashboard}

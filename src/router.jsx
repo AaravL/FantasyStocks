@@ -39,17 +39,4 @@ export const router = createBrowserRouter([
         path: "/league/:leagueId",
         element: <PrivateRoute><LeaguePage /></PrivateRoute>
     },
-
-    {
-        path: "/league/:leagueId/leaderboard", 
-        element: 
-          <PrivateRoute>  <LeaderboardPage /> </PrivateRoute>
-        
-    },
-
-    {
-        path: "/league/:leagueId/AddDropStock",
-        element: <PrivateRoute><AddDropStock /></PrivateRoute>
-    }
-
 ]);

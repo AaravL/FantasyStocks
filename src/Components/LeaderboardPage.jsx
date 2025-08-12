@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 
-const LeaderboardPage = () => {
-  const { leagueId } = useParams();
+const LeaderboardPage = ({leagueId}) => {
   const [stats, setStats] = useState([]);
 
   useEffect(() => {

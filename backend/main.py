@@ -48,6 +48,9 @@ def run_matchups():
     
 @app.post("/add-stock")
 def add_stock_endpoint(stock: Stock):
+
+    print("Adding Stock!")
+
     try:
         return add_stock(stock)
     except Exception as e:

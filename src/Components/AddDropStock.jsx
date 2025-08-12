@@ -3,39 +3,13 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 
-export default function ManageStocksPage() {
+const AddDropStock = ({leagueId, leagueMemberId}) => {
   const [ticker, setTicker] = useState("");
   const [userStocks, setUserStocks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [leagueMemberId, setLeagueMemberId] = useState(null);
 
-  const { leagueId } = useParams();
-  const user = UserAuth();
-  const userId = user?.session?.user?.id;
-
-  // Fetch user's stocks on load
-
-  useEffect(() => {
-  const fetchLeagueMemberId = async () => {
-    const { data, error } = await supabase
-      .from("league_members")
-      .select("league_member_id")
-      .eq("user_id", userId)
-      .eq("league_id", leagueId)
-      .single();
-
-    if (error) {
-      console.error("Error fetching league_member_id:", error.message || error);
-    } else {
-      setLeagueMemberId(data.league_member_id);
- 
-    }};
-    fetchLeagueMemberId();
-  }, [userId, leagueId]
-)
-
-  useEffect(() => {
   const fetchUserStocks = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from("user_stocks")
       .select("Ticker")
@@ -46,15 +20,22 @@ export default function ManageStocksPage() {
     } else {
       setUserStocks(data.map((stock) => stock.Ticker));
     }
+
+    setLoading(false);
   };
 
-  if (leagueMemberId) {
-    fetchUserStocks();
-  }
-}, [leagueMemberId]);
+  useEffect(() => {
+    if (leagueMemberId) {
+      fetchUserStocks();
+    }
+  }, [leagueMemberId]);
 
   const handleAddStock = async (ticker) => {
-  try {
+
+    setLoading(true);
+    setUserStocks([]);
+
+    try {
     const res = await fetch("http://localhost:8000/add-stock", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -69,10 +50,16 @@ export default function ManageStocksPage() {
     console.log(data);
   } catch (err) {
     console.error(err);
+  } finally { 
+    fetchUserStocks();
   }
 };
 
   async function removeStock(stock) {
+
+    setLoading(true);
+    setUserStocks([]);
+
     try {
     const res = await fetch("http://localhost:8000/remove-stock", {
       method: "POST",
@@ -88,19 +75,13 @@ export default function ManageStocksPage() {
     console.log(data);
   } catch (err) {
     console.error(err);
+  } finally { 
+    fetchUserStocks();
   }
   };
 
-  if (!leagueMemberId) {
-    return (
-      <div className="pt-24 text-center">
-        <p>Loading league data...</p>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ maxWidth: 500, margin: "auto", padding: "20px" }}>
+    <div style={{margin: "auto", padding: "20px" }}>
       <h2>Manage Your Tradable Stocks</h2>
 
       {/* Add stock form */}
@@ -117,7 +98,12 @@ export default function ManageStocksPage() {
 
       {/* Stock list */}
       <h3>Your Stocks</h3>
-      {userStocks.length === 0 ? (
+
+      {loading && 
+        <p className="text-yellow-300">Loading stocks!</p>
+      }
+
+      {userStocks.length === 0 && !loading? (
         <p>No stocks yet. Add one above!</p>
       ) : (
         <ul>
@@ -134,3 +120,5 @@ export default function ManageStocksPage() {
     </div>
   );
 }
+
+export default AddDropStock;
