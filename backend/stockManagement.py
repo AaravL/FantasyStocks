@@ -12,7 +12,6 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 API_SECRET = os.getenv("ALPACA_API_SECRET")
 
 # Your other imports and constants
-from config import TIME_CHUNK_SIZE
 from database import get_client
 
 app = FastAPI()

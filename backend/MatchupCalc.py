@@ -12,9 +12,9 @@ load_dotenv()
 # Now safely read env vars
 API_KEY = os.getenv("ALPACA_API_KEY")
 API_SECRET = os.getenv("ALPACA_API_SECRET")
+TIME_CHUNK_SIZE = os.getenv("TIME_CHUNK_SIZE")
 
 # Your other imports and constants
-from config import TIME_CHUNK_SIZE
 from database import get_client, retrieve_stock, add_entries
 from stocks import fetch_price
 
