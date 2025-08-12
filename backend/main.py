@@ -7,6 +7,7 @@ from stocks import fetch_price
 from MatchupCalc import run_weekly_matchups
 from stockManagement import Stock, add_stock, remove_stock
 import traceback
+from database import get_client
 
 app = FastAPI()
 
@@ -61,6 +62,17 @@ def add_stock_endpoint(stock: Stock):
 def remove_stock_endpoint(stock: Stock):
     try:
         return remove_stock(stock)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/hasTicker")
+def has_ticker(leagueMemberId, ticker):
+    try:
+        client = get_client()
+        existing_stock = client.table("user_stocks").select("*").eq("league_member_id", leagueMemberId).eq("Ticker", ticker).execute().data
+        print("Query response:", existing_stock)
+        return {"has_ticker": len(existing_stock) > 0}  
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

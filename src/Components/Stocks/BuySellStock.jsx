@@ -157,8 +157,28 @@ const BuySellStock = ({leagueMemberId}) => {
         return portfolio;
     };
 
+    const checkHasTicker = async ({leagueMemberId, symbol}) =>
+    {
+        console.log("Checking user ownership of ticker:", symbol);
+        try{
+            const res = await fetch(`http://localhost:8000/hasTicker?leagueMemberId=${leagueMemberId}&ticker=${symbol}`);
+            const data = await res.json();
+            return data.has_ticker;
+        }
+        catch (err) {
+            console.error("Error checking user ownership ticker:", err);
+            return false;
+        }
+    }
+
 
     const handleBuy = async ({ leagueMemberId, symbol, stockAmt, vwap, isShares }) => {
+        const hasTicker = await checkHasTicker({ leagueMemberId, symbol });
+        if (!hasTicker) {
+         setError("You cannot trade this stock");
+         throw new Error("You cannot trade this stock");
+        }
+
         const portfolio = await getOrCreatePortfolio(leagueMemberId);
         if (!portfolio) return;
 
