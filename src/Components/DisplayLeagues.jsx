@@ -2,7 +2,7 @@ import React, { useState, useEffect, use } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
-const DisplayLeagues = ({ userId }) => {
+const DisplayLeagues = ({ userId, refreshKey }) => {
     const [count, setCount] = useState(null);
     const [error, setError] = useState(null);
     const [leagues, setLeagues] = useState([]);
@@ -25,7 +25,7 @@ const DisplayLeagues = ({ userId }) => {
             }
         };
         fetchCount();
-    }, [userId]);
+    }, [userId, refreshKey]);
 
     const nextInd = () => {
         console.log(leagues);

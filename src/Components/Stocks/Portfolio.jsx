@@ -69,7 +69,7 @@ const Portfolio = ({leagueMemberId}) => {
         <div className="space-y-4">
             
             {loading && <p className="text-yellow-400">Loading...</p>}
-            {error && !loading && <p className="text-red-600">{error}</p>}
+            {error && !loading && <p className="text-red-600">{error.message}</p>}
 
             {!loading && !error && (
                 <>

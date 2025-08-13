@@ -1,7 +1,7 @@
 import {supabase } from "../supabaseClient";
 import React, { useState, useEffect } from 'react';
 
-const LeagueCreation = ({ userId }) => {
+const LeagueCreation = ({ userId, onEdit }) => {
     const [leagueName, setLeagueName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -31,6 +31,7 @@ const LeagueCreation = ({ userId }) => {
             console.error("Error creating league:", error);
         } finally {
             setLoading(false);
+            onEdit();
         }
     };
     

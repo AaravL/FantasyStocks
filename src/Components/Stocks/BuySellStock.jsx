@@ -78,8 +78,6 @@ const BuySellStock = ({leagueMemberId}) => {
     }
 
     const handleSubmit = async (e) => { 
-
-        alert("Starting!");
         setError(null);
 
         e.preventDefault();
@@ -92,11 +90,10 @@ const BuySellStock = ({leagueMemberId}) => {
         const { result, error } = await fetchStockInfo(e);
 
         if (error) { 
-            alert("No transaction due to stock error!");
+            setError("No transaction due to stock error!");
             return ;
         }
 
-        alert("Stock good to go!");
         const vwap = result.price_data.vwap;
 
         const key = {
@@ -107,18 +104,11 @@ const BuySellStock = ({leagueMemberId}) => {
             isShares,
         };
 
-        alert("here");
-
         if (isBuy) {
-            alert("Buying...");
             await handleBuy(key);
-            alert("Bought!");
         } else {
-            alert("Selling...");
             await handleSell(key);
-            alert("Sold!");
         }
-        alert("Done!");
         console.log("Transaction successful");        
     }
 
@@ -211,7 +201,6 @@ const BuySellStock = ({leagueMemberId}) => {
                 })
                 .eq("league_member_id", leagueMemberId)
                 .eq("ticker", symbol);
-                alert("Updating value!");
         } else {
             await supabase.from("holdings").insert({
                 league_member_id: leagueMemberId,
@@ -219,7 +208,6 @@ const BuySellStock = ({leagueMemberId}) => {
                 stock_amount: shares,
                 stock_unit_cost: vwap,
             });
-            alert("Creating value!");
         }
 
         await supabase

@@ -1,7 +1,7 @@
 import {supabase } from "../supabaseClient";
 import React, { useState, useEffect } from 'react';
 
-const JoinLeague = ({ userId }) => {
+const JoinLeague = ({ userId, onEdit }) => {
     const [leagueCode, setLeagueCode] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -49,6 +49,7 @@ const JoinLeague = ({ userId }) => {
             setError("An error occurred while joining the league.");
             console.error("Error joining league:", error);
         } finally {
+            onEdit();
             setLoading(false);
         }
     }

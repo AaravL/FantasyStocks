@@ -15,6 +15,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = () => setRefreshKey(prev => (prev + 1) % 2);
+
   // Fetch display_name from "profiles" table
   useEffect(() => {
     const fetchDisplayName = async () => {
@@ -67,12 +70,12 @@ const Dashboard = () => {
       </p>
 
       <Card title = "Current League">
-        <DisplayLeagues  userId={session?.user?.id} />
+        <DisplayLeagues userId={session?.user?.id} refreshKey={refreshKey} />
       </Card>
 
       <Card title = "League Creation">
-        <LeagueCreation userId={session?.user?.id} />
-        <JoinLeague userId={session?.user?.id} />
+        <LeagueCreation userId={session?.user?.id} onEdit={refresh} />
+        <JoinLeague userId={session?.user?.id} onEdit={refresh} />
       </Card>
 
       <div>

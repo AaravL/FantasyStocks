@@ -82,7 +82,7 @@ const LeaderboardPage = ({leagueId}) => {
   }, [leagueId]);
 
   return (
-    <div className="pt-24 text-center">
+    <div className="text-center">
       <h1 className="text-3xl font-bold mb-6">Leaderboard</h1>
       <table className="mx-auto text-left border border-collapse">
         <thead>
