@@ -24,6 +24,12 @@ const Portfolio = ({leagueMemberId}) => {
 
         if (error) { 
             setError(error);
+            if (error.message.includes("no) rows returned")) {
+                setHoldings([]);
+                setError(null); 
+          } else {
+             setError(error);
+    }
         } else { 
             setWeekStartAmt(portfolio.start_of_week_total);
             setCurrentBalance(portfolio.current_balance);
@@ -64,7 +70,13 @@ const Portfolio = ({leagueMemberId}) => {
         fetchStockInfo();
     }, [leagueMemberId]);
 
-
+    if (!loading && !error && holdings.length === 0) {
+          return (
+             <div className="space-y-4">
+                 <p className="text-yellow-400">Portfolio is empty.</p>
+             </div>
+      );
+    }
     return (
         <div className="space-y-4">
             
