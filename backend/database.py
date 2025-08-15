@@ -1,4 +1,4 @@
-from supabase import create_client, Client
+from supabase import create_client, Client, acreate_client, AsyncClient
 import pandas as pd
 
 from dotenv import load_dotenv
@@ -13,6 +13,15 @@ def get_client() -> Client:
     key = os.getenv("VITE_SUPABASE_ANON_KEY")
     client = create_client(url, key)
     
+    return client
+
+"""
+Get an async supabase client
+"""
+async def get_async_client() -> AsyncClient: 
+    url = os.getenv("VITE_SUPABASE_URL")
+    key = os.getenv("VITE_SUPABASE_ANON_KEY")
+    client = await acreate_client(url, key)
     return client
     
 """

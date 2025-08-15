@@ -26,7 +26,7 @@ function ButtonGroup({optionOneString, optionTwoString, handleFunc, toggleVariab
 const BuySellStock = ({leagueMemberId}) => { 
 
     const [symbol, setSymbol] = useState("");
-    const [stockAmt, setStockAmt] = useState(null);
+    const [stockAmt, setStockAmt] = useState("");
     const [isShares, setIsShares] = useState(true);
     const [isBuy, setIsBuy] = useState(true);
     const [error, setError] = useState('');
@@ -284,7 +284,7 @@ const BuySellStock = ({leagueMemberId}) => {
     return (
         <form onSubmit={handleSubmit}> 
             {/* Top row (ticker symbol + optional information) */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center">
                 <input id="ticker" type="text" placeholder="ticker" className="border p-2 rounded outline outline-white focus:outline-blue-700"
                     value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())}
                     onKeyDown={(e) => {
@@ -320,7 +320,7 @@ const BuySellStock = ({leagueMemberId}) => {
                     className="mt-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value = {stockAmt} onChange={(e) => {
                         let value = Number(e.target.value);
-                        if (value === 0) value = null;
+                        if (value === 0) value = "";
                         setStockAmt(value)
                     
                     }}

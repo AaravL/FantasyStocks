@@ -2,8 +2,10 @@ import React, { useState, useEffect, use } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
+import { DraftState } from "../constants/draftState";
+import Draft from "./Draft";
 
-const AddDropStock = ({leagueId, leagueMemberId}) => {
+const MakeAction = ({leagueId, leagueMemberId}) => { 
   const [ticker, setTicker] = useState("");
   const [userStocks, setUserStocks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,24 +38,24 @@ const AddDropStock = ({leagueId, leagueMemberId}) => {
     setUserStocks([]);
 
     try {
-    const res = await fetch("http://localhost:8000/add-stock", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        league_member_id: leagueMemberId,
-        league_id: leagueId, // from URL params
-        ticker: ticker
-      })
-    });
+      const res = await fetch("http://localhost:8000/add-stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          league_member_id: leagueMemberId,
+          league_id: leagueId, // from URL params
+          ticker: ticker
+        })
+      });
 
-    const data = await res.json();
-    console.log(data);
-  } catch (err) {
-    console.error(err);
-  } finally { 
-    fetchUserStocks();
-  }
-};
+      const data = await res.json();
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    } finally { 
+      fetchUserStocks();
+    }
+  };
 
   async function removeStock(stock) {
 
@@ -61,23 +63,23 @@ const AddDropStock = ({leagueId, leagueMemberId}) => {
     setUserStocks([]);
 
     try {
-    const res = await fetch("http://localhost:8000/remove-stock", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        league_member_id: leagueMemberId,
-        league_id: leagueId, // from URL params
-        ticker: stock
-      })
-    });
+      const res = await fetch("http://localhost:8000/remove-stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          league_member_id: leagueMemberId,
+          league_id: leagueId, // from URL params
+          ticker: stock
+        })
+      });
 
-    const data = await res.json();
-    console.log(data);
-  } catch (err) {
-    console.error(err);
-  } finally { 
-    fetchUserStocks();
-  }
+      const data = await res.json();
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    } finally { 
+      fetchUserStocks();
+    }
   };
 
   return (
@@ -117,6 +119,84 @@ const AddDropStock = ({leagueId, leagueMemberId}) => {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+const DefaultMessage = ({leagueId, onDraftChange}) => {
+
+  const [error, setError] = useState("");
+
+  async function startDraft() { 
+
+    await fetch(`http://localhost:8000/draft/${leagueId}/start`, { 
+      method: "POST",
+    });
+
+    const { data, error } = await supabase
+    .from("leagues")
+    .update({ draft_state: DraftState.IN_PROGRESS })
+    .eq("league_id", leagueId);
+
+    if (error) { 
+      setError("Error (" + error.message + "), please try again later");
+      console.log(error.message)
+    } 
+    
+    onDraftChange();
+  }
+
+  return (
+    <>
+      <p> Draft has not occured yet! When everyone in the league is ready, click the button below to begin!</p>
+      <button onClick ={startDraft}>Start Draft</button>
+      {error && <p>{error}</p>}
+    </>
+  );
+}
+
+const AddDropStock = ({leagueId, userId, leagueMemberId}) => {
+
+  const [league, setLeague] = useState(null);
+  const [error, setError] = useState("");
+
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = () => setRefreshKey(prev => (prev + 1) % 2); 
+
+  useEffect(() => { 
+    const fetchLeague = async () => { 
+      const { data, error } = await supabase
+      .from("leagues")
+      .select("*")
+      .eq("league_id", leagueId)
+      .single();
+      
+      if (error) { 
+        setError(error);
+      } else { 
+        setLeague(data)
+      }
+    }
+
+    fetchLeague();
+  }, [leagueId, refreshKey]);
+  
+
+  return  ( 
+    <div>
+      {league?.draft_state == DraftState.NOT_STARTED && <DefaultMessage leagueId = {leagueId} onDraftChange={refresh} />}
+      {league?.draft_state == DraftState.IN_PROGRESS && <Draft leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} onDraftChange={refresh}/>}
+      {league?.draft_state == DraftState.COMPLETED && <MakeAction leagueId={leagueId} leagueMemberId={leagueMemberId} />}
+
+      <button onClick ={ async () => {
+        const { data, error } = await supabase
+        .from("leagues")
+        .update({ draft_state: DraftState.NOT_STARTED })
+        .eq("league_id", leagueId);
+
+        refresh();
+      }}>TEMP RESET STATE BUTTON</button>
+
     </div>
   );
 }

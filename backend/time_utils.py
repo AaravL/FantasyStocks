@@ -67,3 +67,9 @@ def process_time(now: datetime) -> datetime:
     now = round_to_time_point(now)
     
     return now
+
+"""
+Return the current time in iso format
+"""
+def get_now_iso() -> str: 
+    return datetime.now(tz.utc).isoformat()
