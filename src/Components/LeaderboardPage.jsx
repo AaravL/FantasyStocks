@@ -6,6 +6,7 @@ const LeaderboardPage = ({leagueId}) => {
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
+      
       console.log("🔍 Fetching leaderboard for League ID:", leagueId);
 
       // 1. Fetch all league members in this league

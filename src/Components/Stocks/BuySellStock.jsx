@@ -23,6 +23,67 @@ function ButtonGroup({optionOneString, optionTwoString, handleFunc, toggleVariab
     );
 }
 
+const handleSell = async ({ leagueMemberId, symbol, stockAmt, vwap, isShares, supabase, setError}) => {
+    const shares = isShares ? stockAmt : stockAmt / vwap;
+    const totalValue = shares * vwap;
+
+    const { data: holding, error: holdingErr } = await supabase
+        .from("holdings")
+        .select("*")
+        .eq("league_member_id", leagueMemberId)
+        .eq("ticker", symbol)
+        .single();
+
+    if (holdingErr || !holding) {
+        setError("No shares available to sell");
+        return;
+    }
+
+    const { data: portfolio, error: portfolioErr } = await supabase
+        .from("portfolios")
+        .select("*")
+        .eq("league_member_id", leagueMemberId)
+        .single();
+
+    if (portfolioErr || !portfolio) {
+        setError("Portfolio not found");
+        return;
+    }
+
+    const { error: updatePortfolioErr } = await supabase
+        .from("portfolios")
+        .update({
+            current_balance: portfolio.current_balance + totalValue,
+        })
+        .eq("league_member_id", leagueMemberId);
+
+    if (updatePortfolioErr) {
+        setError("Failed to update portfolio balance");
+        return;
+    }
+
+    const remainingShares = holding.stock_amount - shares;
+    const EPSILON = 0.001;
+
+    if (remainingShares < EPSILON) {
+        await supabase
+            .from("holdings")
+            .delete()
+            .eq("league_member_id", leagueMemberId)
+            .eq("ticker", symbol);
+    } else {
+        await supabase
+            .from("holdings")
+            .update({
+                stock_amount: remainingShares,
+            })
+            .eq("league_member_id", leagueMemberId)
+            .eq("ticker", symbol);
+    }
+};
+
+export { handleSell };
+
 const BuySellStock = ({leagueMemberId}) => { 
 
     const [symbol, setSymbol] = useState("");
@@ -217,69 +278,7 @@ const BuySellStock = ({leagueMemberId}) => {
             }).eq("league_member_id", leagueMemberId);
     };
 
-    const handleSell = async ({ leagueMemberId, symbol, stockAmt, vwap, isShares }) => {
-        const shares = isShares ? stockAmt : stockAmt / vwap;
-        const totalValue = shares * vwap;
 
-        const { data: holding, error: holdingErr } = await supabase
-            .from("holdings")
-            .select("*")
-            .eq("league_member_id", leagueMemberId)
-            .eq("ticker", symbol)
-            .single();
-
-        if (holdingErr || !holding) {
-            setError("No shares available to sell");
-            return;
-        }
-
-        if (holding.stock_amount < shares) {
-            setError("Not enough shares to sell");
-            return;
-        }
-
-        const { data: portfolio, error: portfolioErr } = await supabase
-            .from("portfolios")
-            .select("*")
-            .eq("league_member_id", leagueMemberId)
-            .single();
-
-        if (portfolioErr || !portfolio) {
-            setError("Portfolio not found");
-            return;
-        }
-
-        const { error: updatePortfolioErr } = await supabase
-            .from("portfolios")
-            .update({
-                current_balance: portfolio.current_balance + totalValue,
-            })
-            .eq("league_member_id", leagueMemberId);
-
-        if (updatePortfolioErr) {
-            setError("Failed to update portfolio balance");
-            return;
-        }
-
-        const remainingShares = holding.stock_amount - shares;
-        const EPSILON = 0.001;
-
-        if (remainingShares < EPSILON) {
-            await supabase
-                .from("holdings")
-                .delete()
-                .eq("league_member_id", leagueMemberId)
-                .eq("ticker", symbol);
-        } else {
-            await supabase
-                .from("holdings")
-                .update({
-                    stock_amount: remainingShares,
-                })
-                .eq("league_member_id", leagueMemberId)
-                .eq("ticker", symbol);
-        }
-    };
 
     return (
         <form onSubmit={handleSubmit}> 
