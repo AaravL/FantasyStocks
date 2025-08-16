@@ -1,15 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone as tz
 from typing import Optional
 from datetime import datetime
+
 from stocks import fetch_price
 from MatchupCalc import run_weekly_matchups
 from stockManagement import Stock, add_stock, remove_stock
 import traceback
 from database import get_client
+from draft import router as draft_router
+from chat import router as chat_router
 
 app = FastAPI()
+app.include_router(draft_router)
+app.include_router(chat_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -76,3 +81,10 @@ def has_ticker(leagueMemberId, ticker):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    while True: 
+        data = await websocket.receive_text()
+        await websocket.send_text(f"Message text was {data}")

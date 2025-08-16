@@ -6,10 +6,11 @@ import BuySellStock from "./Stocks/BuySellStock";
 import Portfolio from "./Stocks/Portfolio";
 import AddDropStock from "./AddDropStock";
 import LeaderboardPage from "./LeaderboardPage";
+import ChatWindow from "./ChatWindow"
 import { generateMatchups } from "./matchups"; // Adjust path as needed
 import Card from "./Card.jsx";
 
-const tabs = ["Matchup", "Buy/Sell Stock", "Portfolio", "View Leaderboard", "Add/Drop Stock"];
+const tabs = ["Matchup", "Buy/Sell Stock", "Portfolio", "View Leaderboard", "Add/Drop Stock", "Chat Window"];
 
 const LeaguePage = () => {
   const { leagueId } = useParams();
@@ -195,8 +196,9 @@ const LeaguePage = () => {
       <div className="mt-6">
         <button
           onClick={() => {
-  handleGenerateMatchups();
-}}
+          handleGenerateMatchups();
+          calculateMatchups();
+        }}
           disabled={matchupLoading}
           className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
         >
@@ -223,7 +225,8 @@ const LeaguePage = () => {
         {activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[3] && <LeaderboardPage leagueId={leagueId} />}
-        {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} leagueMemberId={leagueMemberId} />}
+        {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} />}
+        {activeTab == tabs[5] && <ChatWindow leagueId={leagueId} userId={userId} />}
 
       </Card>
 
