@@ -225,7 +225,7 @@ const LeaguePage = () => {
         {activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[3] && <LeaderboardPage leagueId={leagueId} />}
-        {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} />}
+        {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} members = {members}/>}
         {activeTab == tabs[5] && 
           <ChatContextProvider leagueId={leagueId} userId={userId} members = {members}> 
             <ChatWindow/> 

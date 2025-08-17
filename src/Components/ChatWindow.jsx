@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useChatContext } from "../context/ChatContext";
-import ActiveUsers from "./ActiveUsers";
+import { ActiveUsers, UserDisplayWrapper } from "./ActiveUsers";
 
 export default function ChatWindow() { 
 
@@ -8,11 +8,10 @@ export default function ChatWindow() {
     const [text, setText] = useState("");
 
     return (
-        <div className="flex">
-            <div className="w-4/5">
-                <p>Message Window </p>
-                
-                <ul className="w-full bg-white rounded shadow p-4 space-y-1">
+        <UserDisplayWrapper contextCallback={useChatContext}>
+            <p>Message Window </p>
+            
+            <ul className="w-full bg-white rounded shadow p-4 space-y-1">
                 {messages.map((m, i) => (
                     <li key={i} className="text-gray-800 border-b last:border-0 py-1">
                         {m}
@@ -28,14 +27,7 @@ export default function ChatWindow() {
                             setText("");
                         }
                 }}/>
-
-            </ul>
-            
-            </div>
-            <div className="w-1/5">
-                <p>Members</p>
-                <ActiveUsers/>
-            </div>
-        </div>
+            </ul>            
+        </UserDisplayWrapper>
     );
 }

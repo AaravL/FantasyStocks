@@ -1,9 +1,10 @@
 from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect
 import asyncio
 from typing import List, Set, Dict
-from websocket import ConnectionManager, UserContextConnectionManager
 
-from database import get_client
+from websocket import ConnectionManager, UserContextConnectionManager
+from time_utils import get_now_iso
+
 
 router = APIRouter(prefix="/draft", tags=["draft"])
 
@@ -31,16 +32,27 @@ async def init_draft(league_id: str):
     active_drafts[league_id] = task
     return {"status": "running"}
 
+
+"""
+This websocket helps manage a chat window. It sends json information of the following types:  
+1. state - {'type', 'allUsers', 'activeUsers', 'ts'}
+2. presence.join - {'type', 'userId', 'ts'}
+3. presence.leave - {'type', 'userId', 'ts'}
+4. chat.message - {'type', 'userId', 'text', 'ts'}
+"""
 @router.websocket("/ws/{league_id}/{user_id}")
 async def websocket_draft(league_id: str, user_id: str, websocket: WebSocket):
     try: 
         await manager.connect(websocket, league_id, user_id)
 
-
         while True: 
             msg = await websocket.receive_text()
-
-            await manager.broadcast_message(league_id, f"ECHO: {msg}")
+            # await manager.broadcast_json(league_id, {
+            #     "type": "chat.message", 
+            #     "userId": user_id, 
+            #     "text": msg, 
+            #     "ts": get_now_iso()
+            # })
 
     except WebSocketDisconnect: 
         await manager.disconnect(league_id, user_id)

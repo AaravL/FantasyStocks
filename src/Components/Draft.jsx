@@ -1,71 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import { DraftState } from "../constants/draftState";
+import { useDraftContext } from "../context/DraftContext";
+import { UserDisplayWrapper } from "./ActiveUsers";
 
-export default function Draft({leagueId, userId, leagueMemberId, onDraftChange}) { 
+import MakeAddDropAction from "./MakeAddDropAction";
 
-    const [messages, setMessages] = useState([]);
-    const wsRef = useRef(null);
-
-    useEffect(() => {
-        const ws = new WebSocket(`ws://localhost:8000/draft/ws/${leagueId}/${userId}`)
-        wsRef.current = ws; 
-
-        ws.onmessage = (event) => { 
-            try { 
-                console.log(event.data);
-                let data = JSON.parse(event.data);
-
-                switch (data.type) { 
-                    case "presence.leave": { 
-                        setMessages((prev) => [...prev, "USER LEAVE: " + data.userId]);
-                        break;
-                    }
-                    
-                    case "presence.join": { 
-                        setMessages((prev) => [...prev, "USER JOIN: " + data.userId]);
-                        break;
-                    }
-                }
-            } catch (error) {
-                setMessages((prev) => [...prev, event.data]);
-                return;
-            }
-        };
-
-        ws.onclose = () => console.log("ws closed");
-
-        return () => {
-            try { ws.close(); } catch {}
-            wsRef.current = null;
-        };
-
-    }, []);
-
-    const sendOk = () => { 
-        if (wsRef.current?.readyState === WebSocket.OPEN) { 
-            wsRef.current.send("ok");
-        }
-    };
+const ActionWrapper = ({leagueId, leagueMemberId}) => { 
 
     return (
-        <div>
-            <p>Draft page!! Exciting wooohooo!</p>
-            <button
-                onClick={sendOk}
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-                >
-            Send OK
-            </button>
+        <MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId}/>
+    );
+}
 
-            <ul className="w-full bg-white rounded shadow p-4 space-y-1">
-                {messages.map((m, i) => (
-                <li key={i} className="text-gray-800 border-b last:border-0 py-1">
-                    {m}
-                </li>
-                ))}
-            </ul>
+export default function Draft({leagueId, leagueMemberId, onDraftChange}) { 
 
-        </div>
+    const {userId, activeMap, currentTurnUser} = useDraftContext();
+
+    const getUserColor = (user_id) => { 
+        if (user_id === currentTurnUser) { 
+            return "text-blue-600";
+        }
+        if (activeMap.get(String(user_id))) { 
+            return "text-white";
+        }
+        return "text-gray-700";
+    }
+
+    return (
+        <UserDisplayWrapper contextCallback={useDraftContext} getUserColor={getUserColor}>
+            <p className="text-2xl text-fuchsia-500 mb-2" >We are currently in a draft!!!</p>
+
+            {userId !== currentTurnUser && <p>Please wait for your turn!</p>}
+
+            {userId === currentTurnUser && <ActionWrapper leagueId={leagueId} leagueMemberId={leagueMemberId}/>}
+        </UserDisplayWrapper>
     );
 }
