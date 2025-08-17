@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
+import { ChatContextProvider } from "../context/ChatContext.jsx";
 import BuySellStock from "./Stocks/BuySellStock";
 import Portfolio from "./Stocks/Portfolio";
 import AddDropStock from "./AddDropStock";
@@ -225,8 +226,11 @@ const LeaguePage = () => {
         {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
         {activeTab == tabs[3] && <LeaderboardPage leagueId={leagueId} />}
         {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} />}
-        {activeTab == tabs[5] && <ChatWindow leagueId={leagueId} userId={userId} />}
-
+        {activeTab == tabs[5] && 
+          <ChatContextProvider leagueId={leagueId} userId={userId} members = {members}> 
+            <ChatWindow/> 
+          </ChatContextProvider>
+        }
       </Card>
 
       <button

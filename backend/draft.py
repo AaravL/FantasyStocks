@@ -33,9 +33,10 @@ async def init_draft(league_id: str):
 
 @router.websocket("/ws/{league_id}/{user_id}")
 async def websocket_draft(league_id: str, user_id: str, websocket: WebSocket):
-    await manager.connect(websocket, league_id, user_id)
-
     try: 
+        await manager.connect(websocket, league_id, user_id)
+
+
         while True: 
             msg = await websocket.receive_text()
 

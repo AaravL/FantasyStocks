@@ -2,6 +2,7 @@ import React, { useState, useEffect, use } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
+import { DraftContext } from "../context/DraftContext.jsx";
 import { DraftState } from "../constants/draftState";
 import Draft from "./Draft";
 
@@ -185,7 +186,10 @@ const AddDropStock = ({leagueId, userId, leagueMemberId}) => {
   return  ( 
     <div>
       {league?.draft_state == DraftState.NOT_STARTED && <DefaultMessage leagueId = {leagueId} onDraftChange={refresh} />}
-      {league?.draft_state == DraftState.IN_PROGRESS && <Draft leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} onDraftChange={refresh}/>}
+      {league?.draft_state == DraftState.IN_PROGRESS && 
+      <DraftContext.Provider>
+        <Draft leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} onDraftChange={refresh}/>
+      </DraftContext.Provider>}
       {league?.draft_state == DraftState.COMPLETED && <MakeAction leagueId={leagueId} leagueMemberId={leagueMemberId} />}
 
       <button onClick ={ async () => {
