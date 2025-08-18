@@ -40,7 +40,7 @@ async def run_draft(league_id: str):
 
     try: 
         #Draft Logic
-        await manager.broadcast_json(league_id, {'type': 'draft.stateChange', 'draftState' : DraftState.IN_PROGRESS})
+        await manager.broadcast_json(league_id, {'type': 'draft.stateChange', 'draftState' : DraftState.IN_PROGRESS.value})
  
     finally: 
         active_drafts.pop(league_id)

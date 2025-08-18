@@ -11,10 +11,13 @@ import MakeAddDropAction from "./MakeAddDropAction.jsx";
 const DefaultMessage = ({leagueId, setDraftState}) => {
 
   const [error, setError] = useState("");
-  const {activeMap} = useDraftContext();
+  const {activeMap, draftState} = useDraftContext();
+
+  useEffect(() => { 
+    setDraftState(draftState);
+  }, [draftState])
 
   async function startDraft() { 
-
     for (const present of activeMap.values()) { 
       if (present === false) { 
         alert("Everyone must be present before starting the draft!");

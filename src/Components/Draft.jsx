@@ -18,7 +18,7 @@ export default function Draft({leagueId, leagueMemberId, setDraftState}) {
     const {userId, activeMap, currentTurnUser} = useDraftContext();
 
     const getUserColor = (user_id) => { 
-        if (user_id === currentTurnUser) { 
+        if (user_id === currentTurnUser && activeMap.get(String(user_id))) { 
             return "text-blue-600";
         }
         if (activeMap.get(String(user_id))) { 
@@ -28,7 +28,7 @@ export default function Draft({leagueId, leagueMemberId, setDraftState}) {
     }
 
     return (
-        <UserDisplayWrapper contextCallback={useDraftContext} getUserColor={getUserColor}>
+        <UserDisplayWrapper contextCallback={useDraftContext} getUserColor={getUserColor}> 
             <p className="text-2xl text-fuchsia-500 mb-2" >We are currently in a draft!!!</p>
 
             {userId !== currentTurnUser && <p>Please wait for your turn!</p>}

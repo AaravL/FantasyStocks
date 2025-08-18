@@ -1,4 +1,5 @@
 import {createContext, useContext, useState, useEffect, useRef, useMemo} from "react";
+import { DraftState } from "../constants/draftState";
 
 export const DraftContext = createContext(null);
 
@@ -13,6 +14,7 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
     const [allUsers, setAllUsers] = useState([]);
     const [activeMap, setActiveMap] = useState(() => new Map());
     const [currentTurnUser, setCurrentTurnUser] = useState(null);
+    const [draftState, setDraftState] = useState(DraftState.NOT_STARTED);
     const wsRef = useRef(null);
 
     const pendingRef = useRef([]);
@@ -53,6 +55,10 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
                             return newMap; 
                         });
                         break;
+                    }
+
+                    case "draft.stateChange": { 
+                        setDraftState(data.draftState);
                     }
 
                 }
@@ -99,7 +105,7 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
         }
     }
 
-    const draftContextValue = useMemo(() => ({userId, allUsers, activeMap, members, currentTurnUser}), [userId, allUsers, activeMap, members, currentTurnUser]);
+    const draftContextValue = useMemo(() => ({userId, allUsers, activeMap, members, currentTurnUser, draftState}), [userId, allUsers, activeMap, members, draftState, currentTurnUser]);
 
     return (
         <DraftContext.Provider value = {draftContextValue}>
