@@ -17,6 +17,7 @@ This websocket helps manage a chat window. It sends json information of the foll
 """
 @router.websocket("/ws/{league_id}/{user_id}")
 async def chat_websocket(league_id: str, user_id: str, websocket: WebSocket):
+
     try: 
         await manager.connect(websocket, league_id, user_id)
 

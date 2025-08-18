@@ -105,6 +105,7 @@ class UserContextConnectionManager(ConnectionManager):
         await super().connect(websocket, league_id, user_id)
 
         all_users, active_users = await self.get_room_info(league_id)
+ 
         await self.send_json(websocket, {
             "type": "state", 
             "allUsers": all_users, 
