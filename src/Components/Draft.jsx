@@ -9,11 +9,11 @@ import MakeAddDropAction from "./MakeAddDropAction";
 const ActionWrapper = ({leagueId, leagueMemberId}) => { 
 
     return (
-        <MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId}/>
+        <div className="border-2 border-white m-3"><MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId}/></div>
     );
 }
 
-export default function Draft({leagueId, leagueMemberId, onDraftChange}) { 
+export default function Draft({leagueId, leagueMemberId, setDraftState}) { 
 
     const {userId, activeMap, currentTurnUser} = useDraftContext();
 
@@ -33,7 +33,11 @@ export default function Draft({leagueId, leagueMemberId, onDraftChange}) {
 
             {userId !== currentTurnUser && <p>Please wait for your turn!</p>}
 
-            {userId === currentTurnUser && <ActionWrapper leagueId={leagueId} leagueMemberId={leagueMemberId}/>}
+            {userId === currentTurnUser && 
+            <>
+                <p>It is your turn!</p>
+                <ActionWrapper leagueId={leagueId} leagueMemberId={leagueMemberId}/>
+            </>}
         </UserDisplayWrapper>
     );
 }
