@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 
-const MakeAddDropAction = ({leagueId, leagueMemberId}) => { 
+const MakeAddDropAction = ({leagueId, leagueMemberId, callBack = null}) => { 
   const [ticker, setTicker] = useState("");
   const [userStocks, setUserStocks] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const work = callBack ?? (() => {});
 
   const fetchUserStocks = async () => {
     setLoading(true);
@@ -30,6 +32,7 @@ const MakeAddDropAction = ({leagueId, leagueMemberId}) => {
 
   const handleAddStock = async (ticker) => {
 
+
     setLoading(true);
     setUserStocks([]);
 
@@ -49,6 +52,7 @@ const MakeAddDropAction = ({leagueId, leagueMemberId}) => {
     } catch (err) {
       console.error(err);
     } finally { 
+      work();
       fetchUserStocks();
     }
   };

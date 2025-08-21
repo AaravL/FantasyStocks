@@ -1,4 +1,4 @@
-import {createContext, useContext, useState, useEffect, useRef, useMemo} from "react";
+import {createContext, useContext, useCallback, useState, useEffect, useRef, useMemo} from "react";
 import { DraftState } from "../constants/draftState";
 
 export const DraftContext = createContext(null);
@@ -14,7 +14,9 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
     const [allUsers, setAllUsers] = useState([]);
     const [activeMap, setActiveMap] = useState(() => new Map());
     const [currentTurnUser, setCurrentTurnUser] = useState(null);
-    const [draftState, setDraftState] = useState(DraftState.NOT_STARTED);
+    const [draftState, setDraftState] = useState(null);
+    const [roundNum, setRoundNum] = useState(1);
+    const [deadline, setDeadline] = useState(null);
     const wsRef = useRef(null);
 
     const pendingRef = useRef([]);
@@ -22,12 +24,12 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
     useEffect(() => {
         const ws = new WebSocket(`ws://localhost:8000/draft/ws/${leagueId}/${userId}`)
         wsRef.current = ws; 
-
-        setCurrentTurnUser(members[0].user_id);
-
+        
         const onMessage = (event) => { 
             try { 
                 let data = JSON.parse(event.data);
+
+                console.log(data);
 
                 switch (data.type) { 
                     case "state": { 
@@ -59,6 +61,20 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
 
                     case "draft.stateChange": { 
                         setDraftState(data.draftState);
+                        break;
+                    }
+
+                    case "draft.info" : 
+                    case "draft.turnStart" : { 
+                        setRoundNum(data.roundNum);
+                        setCurrentTurnUser(data.currentUserId);
+                        setDeadline(data.deadline);
+                        setDraftState(data.draftState);
+                        break;
+                    }
+
+                    case "draft.turnEnd" : { 
+                        console.log("TURN END")
                     }
 
                 }
@@ -96,16 +112,20 @@ export function DraftContextProvider({leagueId, userId, members, children}) {
 
     }, [leagueId, userId]);
 
-    const sendChat = (text) => { 
+    const notifyDraftPick = useCallback(() => { 
         const ws = wsRef.current; 
+        let text = JSON.stringify({"type" : "draft.picked"});
         if (ws && ws.readyState === WebSocket.OPEN) { 
             ws.send(text);
         } else { 
             pendingRef.current.push(text);
         }
-    }
+    }, []);
 
-    const draftContextValue = useMemo(() => ({userId, allUsers, activeMap, members, currentTurnUser, draftState}), [userId, allUsers, activeMap, members, draftState, currentTurnUser]);
+    const draftContextValue = useMemo(() => 
+        ({userId, allUsers, activeMap, members, currentTurnUser, draftState, roundNum, deadline, notifyDraftPick}), 
+        [userId, allUsers, activeMap, members, currentTurnUser, draftState, roundNum, deadline, notifyDraftPick]
+    );
 
     return (
         <DraftContext.Provider value = {draftContextValue}>

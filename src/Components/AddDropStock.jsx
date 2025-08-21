@@ -13,8 +13,10 @@ const DefaultMessage = ({leagueId, setDraftState}) => {
   const [error, setError] = useState("");
   const {activeMap, draftState} = useDraftContext();
 
-  useEffect(() => { 
-    setDraftState(draftState);
+  useEffect(() => {
+      if (draftState !== null && draftState !== undefined) {  
+          setDraftState(draftState);
+      }
   }, [draftState])
 
   async function startDraft() { 
@@ -71,19 +73,19 @@ const AddDropStock = ({leagueId, userId, leagueMemberId, members}) => {
 
   return  ( 
     <div>
-      {draftState && draftState == DraftState.NOT_STARTED && 
-        <DraftContextProvider leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} members = {members}>
-          <DefaultMessage leagueId = {leagueId} setDraftState={setDraftState} />
+      { draftState && draftState !== DraftState.COMPLETED && 
+        <DraftContextProvider leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} members={members}>
+        {draftState && draftState === DraftState.NOT_STARTED && 
+            <DefaultMessage leagueId = {leagueId} setDraftState={setDraftState} />
+        }
+        
+        {draftState && draftState === DraftState.IN_PROGRESS && 
+            <Draft leagueId={leagueId} leagueMemberId={leagueMemberId} setDraftState={setDraftState}/>
+        }
         </DraftContextProvider>
       }
-      
-      {draftState && draftState == DraftState.IN_PROGRESS && 
-        <DraftContextProvider leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} members = {members}>
-          <Draft leagueId={leagueId} leagueMemberId={leagueMemberId} setDraftState={setDraftState}/>
-        </DraftContextProvider>
-      }
-      
-      {draftState && draftState == DraftState.COMPLETED && <MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId}/>}
+
+      {draftState && draftState === DraftState.COMPLETED && <MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId}/>}
 
       <button onClick ={ async () => {
         const { data, error } = await supabase
