@@ -1,71 +1,69 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import { DraftState } from "../constants/draftState";
+import { useDraftContext } from "../context/DraftContext";
+import { UserDisplayWrapper } from "./ActiveUsers";
 
-export default function Draft({leagueId, userId, leagueMemberId, onDraftChange}) { 
+import MakeAddDropAction from "./MakeAddDropAction";
 
-    const [messages, setMessages] = useState([]);
-    const wsRef = useRef(null);
+const ActionWrapper = ({leagueId, leagueMemberId, callBack = null}) => { 
+    return (
+        <div className="border-2 border-white m-3"><MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId} callBack={callBack}/></div>
+    );
+}
+
+const Timer = ({ deadline }) => {
+  const [remaining, setRemaining] = useState(() => deadline - Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setRemaining(deadline - Date.now());
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [deadline]);
+
+  if (remaining <= 0) return <span>00:00</span>;
+
+  const minutes = String(Math.floor(remaining / 60000)).padStart(2, "0");
+  const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, "0");
+
+  return <span>{minutes}:{seconds}</span>;
+};
+
+
+export default function Draft({leagueId, leagueMemberId, setDraftState}) { 
+
+    const {userId, roundNum, deadline, activeMap, currentTurnUser, notifyDraftPick, draftState} = useDraftContext();
 
     useEffect(() => {
-        const ws = new WebSocket(`ws://localhost:8000/draft/ws/${leagueId}/${userId}`)
-        wsRef.current = ws; 
-
-        ws.onmessage = (event) => { 
-            try { 
-                console.log(event.data);
-                let data = JSON.parse(event.data);
-
-                switch (data.type) { 
-                    case "presence.leave": { 
-                        setMessages((prev) => [...prev, "USER LEAVE: " + data.userId]);
-                        break;
-                    }
-                    
-                    case "presence.join": { 
-                        setMessages((prev) => [...prev, "USER JOIN: " + data.userId]);
-                        break;
-                    }
-                }
-            } catch (error) {
-                setMessages((prev) => [...prev, event.data]);
-                return;
-            }
-        };
-
-        ws.onclose = () => console.log("ws closed");
-
-        return () => {
-            try { ws.close(); } catch {}
-            wsRef.current = null;
-        };
-
-    }, []);
-
-    const sendOk = () => { 
-        if (wsRef.current?.readyState === WebSocket.OPEN) { 
-            wsRef.current.send("ok");
+        if (draftState !== null && draftState !== undefined) {  
+            setDraftState(draftState);
         }
-    };
+    }, [draftState])
+
+    const getUserColor = (user_id) => { 
+        if (currentTurnUser && user_id === currentTurnUser && activeMap.get(String(user_id))) { 
+            return "text-blue-600";
+        }
+        if (activeMap.get(String(user_id))) { 
+            return "text-white";
+        }
+        return "text-gray-700";
+    }
 
     return (
-        <div>
-            <p>Draft page!! Exciting wooohooo!</p>
-            <button
-                onClick={sendOk}
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-                >
-            Send OK
-            </button>
+        <UserDisplayWrapper contextCallback={useDraftContext} getUserColor={getUserColor}> 
+            <p className="text-2xl text-fuchsia-500 mb-2" >We are currently in a draft!!!</p>
+            {roundNum && deadline && <p> It is round number {roundNum}. The timer is: <Timer deadline={Date.parse(deadline)} /> </p>}
 
-            <ul className="w-full bg-white rounded shadow p-4 space-y-1">
-                {messages.map((m, i) => (
-                <li key={i} className="text-gray-800 border-b last:border-0 py-1">
-                    {m}
-                </li>
-                ))}
-            </ul>
+            {userId !== currentTurnUser && <p>Please wait for your turn!</p>}
 
-        </div>
+            {userId === currentTurnUser && 
+            <>
+                <p>It is your turn!</p>
+                <ActionWrapper leagueId={leagueId} leagueMemberId={leagueMemberId} callBack={notifyDraftPick}/>
+            </>}
+        </UserDisplayWrapper>
     );
 }

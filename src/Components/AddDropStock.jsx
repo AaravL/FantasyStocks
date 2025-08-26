@@ -1,227 +1,101 @@
-import React, { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import { DraftContext } from "../context/DraftContext.jsx";
 import { handleSell } from "./Stocks/BuySellStock";
+import { DraftContextProvider, useDraftContext } from "../context/DraftContext.jsx";
 import { DraftState } from "../constants/draftState";
 import Draft from "./Draft";
+import { UserDisplayWrapper } from "./ActiveUsers.jsx";
+import MakeAddDropAction from "./MakeAddDropAction.jsx";
 
-const MakeAction = ({leagueId, leagueMemberId}) => { 
-  const [ticker, setTicker] = useState("");
-  const [userStocks, setUserStocks] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchUserStocks = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("user_stocks")
-      .select("Ticker")
-      .eq("league_member_id", leagueMemberId);
-
-    if (error) {
-      console.error("Error fetching user stocks:", error);
-    } else {
-      setUserStocks(data.map((stock) => stock.Ticker));
-    }
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (leagueMemberId) {
-      fetchUserStocks();
-    }
-  }, [leagueMemberId]);
-
-  const handleAddStock = async (ticker) => {
-
-    setLoading(true);
-    setUserStocks([]);
-
-    try {
-      const res = await fetch("http://localhost:8000/add-stock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          league_member_id: leagueMemberId,
-          league_id: leagueId, // from URL params
-          ticker: ticker
-        })
-      });
-
-      const data = await res.json();
-      console.log(data);
-    } catch (err) {
-      console.error(err);
-    } finally { 
-      fetchUserStocks();
-    }
-  };
-
-  async function removeStock(stock) {
-
-    setLoading(true);
-    setUserStocks([]);
-
-    const priceRes = await fetch(`http://localhost:8000/price?ticker=${stock}`);
-    const priceData = await priceRes.json();
-
-    if (!priceRes.ok) {
-      console.error(priceData.detail || "Stock data not found");
-      setLoading(false);
-      return;
-    }
-
-    const vwap = priceData.price_data.vwap; // actual VWAP
-
-    try {
-      const res = await fetch("http://localhost:8000/remove-stock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          league_member_id: leagueMemberId,
-          league_id: leagueId, // from URL params
-          ticker: stock
-        })
-      });
-      await handleSell({
-        leagueMemberId,
-        symbol: stock,
-        stockAmt: 1000000, // sell all
-        vwap,
-        isShares: true,
-        supabase,
-        setError
-      });
-      const data = await res.json();
-      console.log(data);
-  } catch (err) {
-    console.error(err);
-  } finally { 
-    fetchUserStocks();
-  }
-  };
-
-  return (
-    <div style={{margin: "auto", padding: "20px" }}>
-      <h2>Manage Your Tradable Stocks</h2>
-
-      {/* Add stock form */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <input
-          type="text"
-          value={ticker}
-          onChange={(e) => setTicker(e.target.value)}
-          placeholder="Enter ticker (e.g. AAPL)"
-          style={{ flex: 1 }}
-        />
-        <button onClick={() => handleAddStock(ticker)}>Add</button>
-      </div>
-
-      {/* Stock list */}
-      <h3>Your Stocks</h3>
-
-      {loading && 
-        <p className="text-yellow-300">Loading stocks!</p>
-      }
-
-      {error && <p className="text-red-600">{error}</p>}
-      
-      {userStocks.length === 0 && !loading? (
-        <p>No stocks yet. Add one above!</p>
-      ) : (
-        <ul>
-          {userStocks.map((stock) => (
-            <li key={stock} style={{ display: "flex", justifyContent: "space-between" }}>
-              {stock}
-              <button onClick={() => removeStock(stock)} disabled={loading}>
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-const DefaultMessage = ({leagueId, onDraftChange}) => {
+const DefaultMessage = ({leagueId, setDraftState}) => {
 
   const [error, setError] = useState("");
+  const {activeMap, draftState} = useDraftContext();
+
+  useEffect(() => {
+      if (draftState !== null && draftState !== undefined) {  
+          setDraftState(draftState);
+      }
+  }, [draftState])
 
   async function startDraft() { 
+    for (const present of activeMap.values()) { 
+      if (present === false) { 
+        alert("Everyone must be present before starting the draft!");
+        return ;
+      }
+    }
 
-    await fetch(`http://localhost:8000/draft/${leagueId}/start`, { 
+    const res = await fetch(`http://localhost:8000/draft/${leagueId}/start`, { 
       method: "POST",
     });
 
-    const { data, error } = await supabase
-    .from("leagues")
-    .update({ draft_state: DraftState.IN_PROGRESS })
-    .eq("league_id", leagueId);
+    if (!res.ok) { 
+      alert("Something went wrong");
+    }
 
-    if (error) { 
-      setError("Error (" + error.message + "), please try again later");
-      console.log(error.message)
-    } 
-    
-    onDraftChange();
+    setDraftState(DraftState.IN_PROGRESS);
   }
 
   return (
-    <>
+    <UserDisplayWrapper contextCallback={useDraftContext}>
       <p> Draft has not occured yet! When everyone in the league is ready, click the button below to begin!</p>
       <button onClick ={startDraft}>Start Draft</button>
-      {error && <p>{error}</p>}
-    </>
+      {error && <p className="text-red-600">{error}</p>}
+    </UserDisplayWrapper>
   );
 }
 
-const AddDropStock = ({leagueId, userId, leagueMemberId}) => {
+const AddDropStock = ({leagueId, userId, leagueMemberId, members}) => {
 
-  const [league, setLeague] = useState(null);
+  const [draftState, setDraftState] = useState(null);
   const [error, setError] = useState("");
 
-  const [refreshKey, setRefreshKey] = useState(0);
-  const refresh = () => setRefreshKey(prev => (prev + 1) % 2); 
-
   useEffect(() => { 
-    const fetchLeague = async () => { 
+    const fetchDraftState = async () => { 
       const { data, error } = await supabase
       .from("leagues")
-      .select("*")
+      .select("draft_state")
       .eq("league_id", leagueId)
       .single();
       
       if (error) { 
         setError(error);
       } else { 
-        setLeague(data)
+        setDraftState(data.draft_state);
       }
     }
 
-    fetchLeague();
-  }, [leagueId, refreshKey]);
+    fetchDraftState();
+  }, [leagueId]);
   
 
   return  ( 
     <div>
-      {league?.draft_state == DraftState.NOT_STARTED && <DefaultMessage leagueId = {leagueId} onDraftChange={refresh} />}
-      {league?.draft_state == DraftState.IN_PROGRESS && 
-      <DraftContext.Provider>
-        <Draft leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} onDraftChange={refresh}/>
-      </DraftContext.Provider>}
-      {league?.draft_state == DraftState.COMPLETED && <MakeAction leagueId={leagueId} leagueMemberId={leagueMemberId} />}
+      { draftState && draftState !== DraftState.COMPLETED && 
+        <DraftContextProvider leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} members={members}>
+        {draftState && draftState === DraftState.NOT_STARTED && 
+            <DefaultMessage leagueId = {leagueId} setDraftState={setDraftState} />
+        }
+        
+        {draftState && draftState === DraftState.IN_PROGRESS && 
+            <Draft leagueId={leagueId} leagueMemberId={leagueMemberId} setDraftState={setDraftState}/>
+        }
+        </DraftContextProvider>
+      }
+
+      {draftState && draftState === DraftState.COMPLETED && <MakeAddDropAction leagueId={leagueId} leagueMemberId={leagueMemberId}/>}
 
       <button onClick ={ async () => {
         const { data, error } = await supabase
         .from("leagues")
-        .update({ draft_state: DraftState.NOT_STARTED })
+        .update({"draft_state": DraftState.NOT_STARTED})
         .eq("league_id", leagueId);
 
-        refresh();
+        setDraftState(DraftState.NOT_STARTED);
       }}>TEMP RESET STATE BUTTON</button>
 
     </div>

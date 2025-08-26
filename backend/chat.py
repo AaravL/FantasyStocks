@@ -7,7 +7,6 @@ from time_utils import get_now_iso
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 manager = UserContextConnectionManager()
-users_ids = set()
 
 """
 This websocket helps manage a chat window. It sends json information of the following types:  

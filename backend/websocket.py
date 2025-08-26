@@ -9,6 +9,7 @@ class ConnectionManager:
     def __init__(self): 
         self.rooms: Dict[str, Dict[str, WebSocket]] = {} # {league_id -> {user_id -> websocket}}
         self.room_users: Dict[str, List[str]] = {} # {league_id -> [all_users]}
+        self.room_info: Dict[str, Any] = {}
         self.locks: Dict[str, asyncio.Lock] = {}
         self.lock_access = asyncio.Lock()
 
@@ -33,12 +34,12 @@ class ConnectionManager:
             self.locks.pop(league_id, None)
 
     """
-    Returns all_users, active_users 
+    Returns all_users, active_users, room_info
     """
-    async def get_room_info(self, league_id: str) -> Tuple[List[str], List[str]]: 
+    async def get_room_info(self, league_id: str) -> Tuple[List[str], List[str], Dict[str, Any]]: 
         lock = await self.get_lock(league_id)
         async with lock: 
-            return self.room_users.get(league_id, []), list(self.rooms.get(league_id, {}).keys())
+            return self.room_users.get(league_id, []), list(self.rooms.get(league_id, {}).keys()), self.room_info
 
     async def connect(self, websocket: WebSocket, league_id: str, user_id: str): 
         await websocket.accept()
@@ -56,6 +57,7 @@ class ConnectionManager:
                 if all_users is None: # Guard against the enter then last user disconnects case
                     all_users = await self.load_league_users(league_id) 
                 self.room_users[league_id] = all_users
+                self.room_info[league_id] = dict()
 
     async def disconnect(self, league_id: str, user_id: str):
         lock = await self.get_lock(league_id)
@@ -65,6 +67,7 @@ class ConnectionManager:
                 if not self.rooms[league_id]: 
                     del self.rooms[league_id]
                     del self.room_users[league_id]
+                    del self.room_info[league_id]
         
         if league_id not in self.room_users:
             await self.delete_lock(league_id)
@@ -104,7 +107,7 @@ class UserContextConnectionManager(ConnectionManager):
     async def connect(self, websocket: WebSocket, league_id: str, user_id: str): 
         await super().connect(websocket, league_id, user_id)
 
-        all_users, active_users = await self.get_room_info(league_id)
+        all_users, active_users, _ = await self.get_room_info(league_id)
         await self.send_json(websocket, {
             "type": "state", 
             "allUsers": all_users, 
