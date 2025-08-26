@@ -281,64 +281,110 @@ const BuySellStock = ({leagueMemberId}) => {
 
 
     return (
-        <form onSubmit={handleSubmit}> 
-            {/* Top row (ticker symbol + optional information) */}
-            <div className="flex items-center">
-                <input id="ticker" type="text" placeholder="ticker" className="border p-2 rounded outline outline-white focus:outline-blue-700"
-                    value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            fetchStockInfo(e);  
-                        }
-                    }}
+        <form
+          onSubmit={handleSubmit}
+          className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black p-6 rounded-lg text-white"
+        >
+          <h2 className="text-3xl font-bold mb-6 text-blue-400 text-center">
+            Buy / Sell Stocks
+          </h2>
+      
+          {/* Ticker Input and Price Info */}
+          <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800 space-y-2">
+            <div className="flex flex-wrap items-center gap-4">
+              <input
+                id="ticker"
+                type="text"
+                placeholder="Ticker"
+                className="bg-black text-white border border-white rounded px-3 py-2 outline-none focus:outline-blue-500"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") fetchStockInfo(e);
+                }}
+              />
+      
+              {loading && <p className="text-blue-300">Loading...</p>}
+              {stockError && !loading && (
+                <p className="text-red-600">{stockError}</p>
+              )}
+      
+              {result?.price_data && !loading && (
+                <>
+                  <p>
+                    <span className="text-blue-300 font-semibold">Price:</span>{" "}
+                    ${result.price_data.vwap}
+                  </p>
+                  <p>
+                    <span className="text-blue-300 font-semibold">Timestamp:</span>{" "}
+                    {new Date(result.price_data.timestamp).toLocaleString()}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+      
+          {/* Toggle Buttons & Amount Input */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Buy/Sell Toggle */}
+            <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
+              <p className="text-blue-300 font-medium mb-2">Buy or Sell</p>
+              <div className="flex space-x-2">
+                <ButtonGroup
+                  optionOneString={"buy"}
+                  optionTwoString={"sell"}
+                  handleFunc={handleBuySell}
+                  toggleVariable={isBuy}
                 />
-
-                {loading && <p className="text-yellow-400 ml-4">Loading...</p>}
-
-                {stockError && !loading && (
-                    <p className="text-red-600 mt-4 text-center">{stockError}</p>
-                )}
-
-                {result?.price_data && !loading && (
-                    <>
-                        <p><strong>Price:</strong> ${result.price_data.vwap}</p>
-                        <p><strong>Timestamp:</strong> {new Date(result.price_data.timestamp).toLocaleString()}</p>
-                    </>
-                )}
+              </div>
             </div>
-
-            {/* Middle row (buy/sell shares/amt text entry) */}
-            <div className="mt-2 flex items-center space-x-4 p-2">
-                <div className="grid grid-cols-2 gap-4">
-                <ButtonGroup optionOneString={"buy"} optionTwoString={"sell"} handleFunc={handleBuySell} toggleVariable={isBuy} />
-                <ButtonGroup optionOneString={"shares"} optionTwoString={"dollars"} handleFunc={handleSharesDollars} toggleVariable={isShares}/>
-                </div>
-
-                <input
-                    id="amount" type="number" placeholder={`${isShares ? "Share amount" : "Dollar Amount"}`} 
-                    className="mt-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value = {stockAmt} onChange={(e) => {
-                        let value = Number(e.target.value);
-                        if (value === 0) value = "";
-                        setStockAmt(value)
-                    
-                    }}
+      
+            {/* Shares/Dollars Toggle */}
+            <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
+              <p className="text-blue-300 font-medium mb-2">Units</p>
+              <div className="flex space-x-2">
+                <ButtonGroup
+                  optionOneString={"shares"}
+                  optionTwoString={"dollars"}
+                  handleFunc={handleSharesDollars}
+                  toggleVariable={isShares}
                 />
+              </div>
             </div>
-
-            <div>
-                <button type="submit" className="bg-blue-600 text-white rounded-md py-2 font-medium hover:bg-blue-700 transition">
-                Submit
-                </button>
+      
+            {/* Amount Input */}
+            <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
+              <p className="text-blue-300 font-medium mb-2">Amount</p>
+              <input
+                id="amount"
+                type="number"
+                placeholder={`${isShares ? "Share amount" : "Dollar Amount"}`}
+                className="w-full bg-black text-white border border-white rounded px-3 py-2 outline-none focus:outline-blue-500"
+                value={stockAmt}
+                onChange={(e) => {
+                  let value = Number(e.target.value);
+                  if (value === 0) value = "";
+                  setStockAmt(value);
+                }}
+              />
             </div>
-            
-            <div>
-                {error && (
-                    <p className="text-red-600 mt-4 text-center">{error}</p>
-                )}
-            </div>
+          </div>
+      
+          {/* Submit Button */}
+          <div className="mt-6 flex justify-center">
+            <button
+              type="submit"
+              className="bg-black text-white border border-white hover:bg-white hover:text-black transition-all duration-200 px-6 py-2 rounded-md font-medium"
+            >
+              Submit
+            </button>
+          </div>
+      
+          {/* Error Output */}
+          {error && <p className="text-red-600 mt-4 text-center">{error}</p>}
         </form>
-    );
+      );
+      
 }
 
 export default BuySellStock;

@@ -1,63 +1,71 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
 const DisplayLeagues = ({ userId, refreshKey }) => {
-    const [count, setCount] = useState(null);
-    const [error, setError] = useState(null);
-    const [leagues, setLeagues] = useState([]);
-    const [index, setIndex] = useState(0);
-    const navigate = useNavigate();
+  const [count, setCount] = useState(null);
+  const [error, setError] = useState(null);
+  const [leagues, setLeagues] = useState([]);
+  const [index, setIndex] = useState(0);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchCount = async () => {
-            try {
-                const {data, count, error: countError } = await supabase
-                    .from('league_members')
-                    .select('league_id, leagues(name)', { count: 'exact'})
-                    .eq('user_id', userId);
-                setCount(count);
-                setError(countError);
-                setLeagues(data || []);
-                setIndex(0);
-            } catch (err) {
-                setError(err);
-            }
-        };
-        fetchCount();
-    }, [userId, refreshKey]);
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const { data, count, error: countError } = await supabase
+          .from('league_members')
+          .select('league_id, leagues(name)', { count: 'exact' })
+          .eq('user_id', userId);
+        setCount(count);
+        setError(countError);
+        setLeagues(data || []);
+        setIndex(0);
+      } catch (err) {
+        setError(err);
+      }
+    };
+    fetchCount();
+  }, [userId, refreshKey]);
 
-    const nextInd = () => {
-        console.log(leagues);
-        console.log(index);
-        if (leagues.length > 0) {
-            setIndex((index+1) % count);
-        }
+  const nextInd = () => {
+    if (leagues.length > 0) {
+      setIndex((index + 1) % count);
     }
+  };
 
-    const goToLeague = () => {
-        if (leagues.length > 0) {
-            navigate(`/league/${leagues[index]?.league_id}`);
-        }
+  const goToLeague = () => {
+    if (leagues.length > 0) {
+      navigate(`/league/${leagues[index]?.league_id}`);
     }
+  };
 
-    return (
-        <div>
-            <div>League count: {count !== null ? count : 'Loading...'}</div>
-            {count === 0 && (
-                <p>You are not part of any leagues. Join or create a league to get started!</p>
-            )}
-            {count > 0 && (
-                <div>
-                    <button onClick = {goToLeague}>League Name : {leagues[index]?.leagues?.name || "cannot retrieve"}</button>
-                    <button onClick={nextInd}>Next League</button>
-                </div>
-            )}
+  return (
+    <div className="flex flex-col justify-between items-center w-[300px] h-[180px] bg-[#1f1f1f] p-4 rounded-xl border border-gray-700 text-white">
+      <div className="mb-4 text-left w-full">
+        <h3 className="text-lg font-semibold mb-2">Your Leagues</h3>
+        <button
+  onClick={goToLeague}
+  className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
+>
+  League: {leagues[index]?.leagues?.name || "Cannot retrieve"}
+</button>
 
-            {error && <div>Error: {error.message}</div>}
+      </div>
+  
+      <button
+  onClick={nextInd}
+  className="border border-white text-white hover:bg-white hover:text-white transition-all duration-200 rounded px-4 py-1 mt-auto"
+>
+  Next League
+</button>
 
-        </div>
-    );
+
+
+  
+      {error && <div className="text-red-500 mt-2">Error: {error.message}</div>}
+    </div>
+  );
+
 };
 
 export default DisplayLeagues;

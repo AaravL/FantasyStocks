@@ -75,7 +75,6 @@ export default function MatchupPage({ leagueId = null }) {
       setWeekLoading(true);
       setError(null);
       try {
-        // Step 1: Get matchups for the current week and league
         let q = supabase
           .from('matchups')
           .select('id, league_id, week, user1_id, user2_id')
@@ -91,7 +90,6 @@ export default function MatchupPage({ leagueId = null }) {
           new Set(matchData.flatMap(m => [m.user1_id, m.user2_id]))
         );
 
-        // Step 2: Get portfolios
         const { data: portfolioData, error: portErr } = await supabase
           .from('portfolios')
           .select('league_member_id, start_of_week_total, current_balance')
@@ -103,7 +101,6 @@ export default function MatchupPage({ leagueId = null }) {
           (portfolioData || []).map(p => [p.league_member_id, p])
         );
 
-        // Step 3: Get holdings
         const { data: holdingsData, error: holdErr } = await supabase
           .from('holdings')
           .select('league_member_id, ticker, stock_amount')
@@ -111,7 +108,6 @@ export default function MatchupPage({ leagueId = null }) {
 
         if (holdErr) throw holdErr;
 
-        // Step 4: Get unique tickers
         const uniqueTickers = Array.from(new Set((holdingsData || []).map(h => h.ticker)));
 
         const { data: pricesData, error: priceErr } = await supabase
@@ -129,7 +125,6 @@ export default function MatchupPage({ leagueId = null }) {
           }
         }
 
-        // Step 5: Calculate scores
         const userEffectiveBalances = {};
         for (const userId of allUserIds) {
           const port = portfoliosById[userId];
@@ -151,7 +146,6 @@ export default function MatchupPage({ leagueId = null }) {
           };
         }
 
-        // Step 6: Attach scores to matchups
         const enrichedMatchups = matchData.map(m => ({
           ...m,
           u1_score: userEffectiveBalances[m.user1_id]?.percent.toFixed(2) ?? '',
@@ -171,51 +165,76 @@ export default function MatchupPage({ leagueId = null }) {
   }, [currentWeek, leagueId]);
 
   return (
-    <div className="matchups-page p-4">
-      <h2 className="text-lg font-semibold mb-2">Matchups</h2>
+    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black py-20 px-4 text-white">
+      <h2 className="text-3xl font-bold mb-8 text-center text-blue-400">Matchups</h2>
 
-      <div className="flex items-center gap-4 mb-4">
-        <div><strong>Week:</strong> {currentWeek ?? '—'}</div>
-        <label>
-          <span>Go to week: </span>
-          <select value={currentWeek ?? ''} onChange={e => setCurrentWeek(parseInt(e.target.value, 10))}>
-            <option value="" disabled>Select week</option>
-            {weeks.map(w => (
-              <option key={w} value={w}>{w}</option>
-            ))}
-          </select>
-        </label>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6 mb-8 text-sm">
+        <div className="bg-zinc-900 px-4 py-3 rounded shadow border border-zinc-800">
+          <strong className="text-gray-300">Current Week:</strong>{' '}
+          <span className="text-white">{currentWeek ?? '—'}</span>
+        </div>
+        <div className="bg-zinc-900 px-4 py-3 rounded shadow border border-zinc-800">
+          <label className="text-gray-300">
+            Go to week:{' '}
+            <select
+              value={currentWeek ?? ''}
+              onChange={(e) => setCurrentWeek(parseInt(e.target.value, 10))}
+              className="bg-black border border-white text-blue-400 px-2 py-1 rounded ml-2"
+            >
+              <option value="" disabled>
+                Select week
+              </option>
+              {weeks.map((w) => (
+                <option key={w} value={w}>
+                  {w}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
-      {loading ? <p>Loading weeks…</p> :
-        error ? <p className="text-red-600">{error}</p> :
-          currentWeek == null ? <p>No weeks found. Generate matchups first.</p> :
-            weekLoading ? <p>Loading matchups…</p> :
-              matchups.length === 0 ? <p>No matchups for week {currentWeek}</p> :
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 border-b">User A ID</th>
-                        <th className="px-2 py-2 border-b">vs</th>
-                        <th className="px-4 py-2 border-b">User B ID</th>
-                        <th className="px-4 py-2 border-b">A Score (%)</th>
-                        <th className="px-4 py-2 border-b">B Score (%)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {matchups.map(m => (
-                        <tr key={m.id}>
-                          <td className="px-4 py-2 border-b">{m.user1_id ?? '—'}</td>
-                          <td className="px-2 py-2 border-b text-center">vs</td>
-                          <td className="px-4 py-2 border-b">{m.user2_id ?? '—'}</td>
-                          <td className="px-4 py-2 border-b text-right">{m.u1_score}%</td>
-                          <td className="px-4 py-2 border-b text-right">{m.u2_score}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>}
+      {loading ? (
+        <p className="text-gray-400 text-center">Loading weeks…</p>
+      ) : error ? (
+        <p className="text-red-500 text-center">{error}</p>
+      ) : currentWeek == null ? (
+        <p className="text-gray-400 text-center">No weeks found. Generate matchups first.</p>
+      ) : weekLoading ? (
+        <p className="text-gray-400 text-center">Loading matchups…</p>
+      ) : matchups.length === 0 ? (
+        <p className="text-gray-400 text-center">No matchups for week {currentWeek}</p>
+      ) : (
+        <div className="overflow-x-auto max-w-4xl mx-auto">
+          <table className="w-full text-sm bg-zinc-900 rounded-lg border border-zinc-800">
+            <thead className="bg-zinc-800 text-blue-400">
+              <tr>
+                <th className="px-4 py-2 border-b border-zinc-700">User A</th>
+                <th className="px-2 py-2 border-b border-zinc-700 text-center">vs</th>
+                <th className="px-4 py-2 border-b border-zinc-700">User B</th>
+                <th className="px-4 py-2 border-b border-zinc-700 text-right">A Score (%)</th>
+                <th className="px-4 py-2 border-b border-zinc-700 text-right">B Score (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matchups.map((m) => (
+                <tr key={m.id} className="text-gray-300">
+                  <td className="px-4 py-2 border-b border-zinc-700">{m.user1_id ?? '—'}</td>
+                  <td className="px-2 py-2 border-b border-zinc-700 text-center">vs</td>
+                  <td className="px-4 py-2 border-b border-zinc-700">{m.user2_id ?? '—'}</td>
+                  <td className={`px-4 py-2 border-b border-zinc-700 text-right ${parseFloat(m.u1_score) < 0 ? 'text-red-400' : 'text-green-400'}`}>
+  {m.u1_score}%
+</td>
+<td className={`px-4 py-2 border-b border-zinc-700 text-right ${parseFloat(m.u2_score) < 0 ? 'text-red-400' : 'text-green-400'}`}>
+  {m.u2_score}%
+</td>
+
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
