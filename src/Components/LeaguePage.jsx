@@ -9,6 +9,7 @@ import LeaderboardPage from "./LeaderboardPage";
 import ChatWindow from "./ChatWindow"
 import { generateMatchups } from "./matchups"; // Adjust path as needed
 import Card from "./Card.jsx";
+import MatchupPage from "./matchupPage"; // adjust path if needed
 
 const tabs = ["Matchup", "Buy/Sell Stock", "Portfolio", "View Leaderboard", "Add/Drop Stock", "Chat Window"];
 
@@ -209,6 +210,8 @@ const LeaguePage = () => {
         )}
       </div>
 
+     
+
       <Card title = "Management">
         <div className="flex border-b border-gray-700">
           {tabs.map((tab) => (
@@ -222,11 +225,13 @@ const LeaguePage = () => {
         </div>  
         
 
-        {activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
-        {activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
-        {activeTab == tabs[3] && <LeaderboardPage leagueId={leagueId} />}
-        {activeTab == tabs[4] && <AddDropStock leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} />}
-        {activeTab == tabs[5] && <ChatWindow leagueId={leagueId} userId={userId} />}
+        {activeTab == tabs[0] && <MatchupPage leagueId={leagueId} />}
+{activeTab == tabs[1] && <BuySellStock leagueMemberId={leagueMemberId} />}
+{activeTab == tabs[2] && <Portfolio leagueMemberId={leagueMemberId} />}
+{activeTab == tabs[3] && <LeaderboardPage leagueId={leagueId} />}
+{activeTab == tabs[4] && <AddDropStock leagueId={leagueId} userId={userId} leagueMemberId={leagueMemberId} />}
+{activeTab == tabs[5] && <ChatWindow leagueId={leagueId} userId={userId} />}
+
 
       </Card>
 
