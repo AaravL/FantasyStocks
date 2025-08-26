@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import { DraftContext } from "../context/DraftContext.jsx";
+import { handleSell } from "./Stocks/BuySellStock";
 import { DraftState } from "../constants/draftState";
 import Draft from "./Draft";
 
@@ -10,6 +11,7 @@ const MakeAction = ({leagueId, leagueMemberId}) => {
   const [ticker, setTicker] = useState("");
   const [userStocks, setUserStocks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchUserStocks = async () => {
     setLoading(true);
@@ -63,6 +65,17 @@ const MakeAction = ({leagueId, leagueMemberId}) => {
     setLoading(true);
     setUserStocks([]);
 
+    const priceRes = await fetch(`http://localhost:8000/price?ticker=${stock}`);
+    const priceData = await priceRes.json();
+
+    if (!priceRes.ok) {
+      console.error(priceData.detail || "Stock data not found");
+      setLoading(false);
+      return;
+    }
+
+    const vwap = priceData.price_data.vwap; // actual VWAP
+
     try {
       const res = await fetch("http://localhost:8000/remove-stock", {
         method: "POST",
@@ -73,14 +86,22 @@ const MakeAction = ({leagueId, leagueMemberId}) => {
           ticker: stock
         })
       });
-
+      await handleSell({
+        leagueMemberId,
+        symbol: stock,
+        stockAmt: 1000000, // sell all
+        vwap,
+        isShares: true,
+        supabase,
+        setError
+      });
       const data = await res.json();
       console.log(data);
-    } catch (err) {
-      console.error(err);
-    } finally { 
-      fetchUserStocks();
-    }
+  } catch (err) {
+    console.error(err);
+  } finally { 
+    fetchUserStocks();
+  }
   };
 
   return (
@@ -106,6 +127,8 @@ const MakeAction = ({leagueId, leagueMemberId}) => {
         <p className="text-yellow-300">Loading stocks!</p>
       }
 
+      {error && <p className="text-red-600">{error}</p>}
+      
       {userStocks.length === 0 && !loading? (
         <p>No stocks yet. Add one above!</p>
       ) : (

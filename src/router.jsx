@@ -9,6 +9,7 @@ import App from "./App";
 import LeaguePage from "./Components/LeaguePage";
 import LeaderboardPage from "./Components/LeaderboardPage"; 
 import AddDropStock from "./Components/AddDropStock";
+import MatchupPage from "./Components/matchupPage";
 
 export const router = createBrowserRouter([
     {
@@ -39,4 +40,7 @@ export const router = createBrowserRouter([
         path: "/league/:leagueId",
         element: <PrivateRoute><LeaguePage /></PrivateRoute>
     },
+
+
+
 ]);

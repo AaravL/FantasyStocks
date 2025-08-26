@@ -1,58 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 
-const LeaderboardPage = ({leagueId}) => {
+const LeaderboardPage = ({ leagueId }) => {
   const [stats, setStats] = useState([]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      console.log("🔍 Fetching leaderboard for League ID:", leagueId);
-
-      // 1. Fetch all league members in this league
       const { data: members, error: memberError } = await supabase
         .from("league_members")
         .select("league_member_id")
         .eq("league_id", leagueId);
 
-      if (memberError) {
-        console.error("❌ Error fetching league members:", memberError);
-        return;
-      }
-
-      if (!members || members.length === 0) {
-        console.warn("⚠️ No members found for league:", leagueId);
-        return;
-      }
+      if (memberError) return console.error("Error fetching league members:", memberError);
+      if (!members || members.length === 0) return;
 
       const leagueMemberIds = members.map((m) => m.league_member_id);
-      console.log("✅ League Members:", leagueMemberIds);
 
-      // 2. Fetch matchups that belong to this league
       const { data: matchups, error: matchupError } = await supabase
         .from("matchups")
         .select("user1_id, user2_id, winner_id")
         .eq("league_id", leagueId);
 
-      if (matchupError) {
-        console.error("❌ Error fetching matchups:", matchupError);
-        return;
-      }
+      if (matchupError) return console.error("Error fetching matchups:", matchupError);
+      if (!matchups || matchups.length === 0) return;
 
-      console.log(`✅ Matchups fetched (${matchups.length}):`, matchups.slice(0, 3));
-
-      if (!matchups || matchups.length === 0) {
-        console.warn("⚠️ No matchups found for league:", leagueId);
-        return;
-      }
-
-      // 3. Process player stats
       const playerStats = {};
 
       for (const m of matchups) {
         const players = [m.user1_id, m.user2_id];
         for (const pid of players) {
           if (!leagueMemberIds.includes(pid)) continue;
-
           if (!playerStats[pid]) playerStats[pid] = { wins: 0, total: 0 };
           playerStats[pid].total++;
         }
@@ -73,8 +50,6 @@ const LeaderboardPage = ({leagueId}) => {
       );
 
       leaderboardData.sort((a, b) => b.winRate - a.winRate);
-      console.log("📊 Final Leaderboard:", leaderboardData);
-
       setStats(leaderboardData);
     };
 
@@ -82,40 +57,49 @@ const LeaderboardPage = ({leagueId}) => {
   }, [leagueId]);
 
   return (
-    <div className="text-center">
-      <h1 className="text-3xl font-bold mb-6">Leaderboard</h1>
-      <table className="mx-auto text-left border border-collapse">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2">Rank</th>
-            <th className="border px-4 py-2">User ID</th>
-            <th className="border px-4 py-2">Wins</th>
-            <th className="border px-4 py-2">Games Played</th>
-            <th className="border px-4 py-2">Win %</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stats.length === 0 ? (
-            <tr>
-              <td colSpan="5" className="border px-4 py-2 text-center">
-                No matchups found.
-              </td>
-            </tr>
-          ) : (
-            stats.map((stat, index) => (
-              <tr key={stat.user_id}>
-                <td className="border px-4 py-2">{index + 1}</td>
-                <td className="border px-4 py-2">{stat.user_id}</td>
-                <td className="border px-4 py-2">{stat.wins}</td>
-                <td className="border px-4 py-2">{stat.total}</td>
-                <td className="border px-4 py-2">
-                  {stat.winRate.toFixed(2)}%
-                </td>
+    <div className="bg-gradient-to-br from-black via-zinc-900 to-black min-h-screen px-6 py-10 text-white rounded-xl">
+      <div className="max-w-4xl mx-auto bg-zinc-900 rounded-2xl shadow-lg p-8">
+        <h1 className="text-4xl font-bold text-blue-400 text-center mb-8">
+          📊 Leaderboard
+        </h1>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-zinc-800">
+            <thead>
+              <tr className="bg-zinc-800 text-blue-300">
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider border border-zinc-700">Rank</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider border border-zinc-700">User ID</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider border border-zinc-700">Wins</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider border border-zinc-700">Games Played</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider border border-zinc-700">Win %</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody className="bg-zinc-950">
+              {stats.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-4 text-center text-gray-400 border border-zinc-700">
+                    No matchups found.
+                  </td>
+                </tr>
+              ) : (
+                stats.map((stat, index) => (
+                  <tr key={stat.user_id} className="hover:bg-zinc-800 transition">
+                    <td className="px-6 py-4 border border-zinc-700">{index + 1}</td>
+                    <td className="px-6 py-4 border border-zinc-700 text-blue-300">{stat.user_id}</td>
+                    <td className="px-6 py-4 border border-zinc-700">{stat.wins}</td>
+                    <td className="px-6 py-4 border border-zinc-700">{stat.total}</td>
+                    <td className={`px-6 py-4 border border-zinc-700 font-medium ${
+                      stat.winRate === 0 ? 'text-red-400' : 'text-green-400'
+                    }`}>
+                      {stat.winRate.toFixed(2)}%
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
