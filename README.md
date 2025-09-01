@@ -1,12 +1,12 @@
-# React + Vite
+ Stock Market Fantasy Draft App
+A full-stack web application that lets users participate in fantasy-style leagues based on real-time stock market performance. Users can draft stocks, manage their portfolios, and compete against others for the highest return.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+ Features
+Real-time Trading: Integrates with the Alpaca Market API to fetch live stock data and execute simulated trades.
+Fantasy League System: Users can create or join leagues, draft stocks in a real-time system, and compete against others.
+Portfolio Tracking: Each user receives a virtual portfolio to track balances, holdings, and historical performance.
+Weekly Matchups: Compete head-to-head with other members in your league based on portfolio growth.
+Live Leaderboard: Dynamic leaderboard showing win rates, game stats, and overall rankings.
+Modern UI: Built with React, TailwindCSS, and responsive design principles for a clean, mobile-friendly experience.
